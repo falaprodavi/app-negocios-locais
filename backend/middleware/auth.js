@@ -51,7 +51,7 @@ exports.authorize = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Usuário com role ${req.user.role} não tem acesso a esta rota`,
+        message: `Acesso negado: requer permissão de ${roles}`,
       });
     }
     next();

@@ -108,19 +108,48 @@ exports.updateUser = async (req, res, next) => {
 };
 
 // @desc    Excluir conta de usuário
-// @route   DELETE /api/auth/me
-// @access  Private
+// @route   DELETE /api/auth/:id
+// @access  Private/Admin
 exports.deleteUser = async (req, res, next) => {
   try {
-    // Opção 1: Remover completamente do banco
-    // await User.findByIdAndDelete(req.user.id);
+    // Verifica se o usuário a ser deletado existe
+    const userToDelete = await User.findById(req.params.id);
 
-    // Opção 2: Marcar como inativo (soft delete)
-    await User.findByIdAndUpdate(req.user.id, { isActive: false });
+    if (!userToDelete) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuário não encontrado",
+      });
+    }
+
+    // Opção 1: Remoção permanente (descomente se preferir)
+    // await User.findByIdAndDelete(req.params.id);
+
+    // Opção 2: Soft delete (comente se usar a opção 1)
+    await User.findByIdAndUpdate(req.params.id, { isActive: false });
 
     res.status(200).json({
       success: true,
       data: {},
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+// @desc    Listar todos os usuários (apenas admin)
+// @route   GET /api/auth/users
+// @access  Private/Admin
+exports.getUsers = async (req, res, next) => {
+  try {
+    // Exclui a senha dos resultados
+    const users = await User.find().select('-password');
+    
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
     });
   } catch (err) {
     next(err);

@@ -5,7 +5,7 @@ const cors = require("cors");
 
 const app = express();
 
-const { protect, authorize } = require('./middleware/auth');
+const { protect, authorize } = require("./middleware/auth");
 
 // Middleware
 app.use(cors());
@@ -13,7 +13,12 @@ app.use(express.json());
 
 // Rotas
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/cities", require("./routes/cities"));
+app.use("/api/neighborhoods", require("./routes/neighborhoods"));
+app.use("/api/categories", require("./routes/categories"));
+app.use("/api/subcategories", require("./routes/subcategories"));
 app.use("/api/businesses", require("./routes/businesses"));
+app.use("/api/favorites", require("./routes/favorites"));
 
 // Conexão com MongoDB
 mongoose

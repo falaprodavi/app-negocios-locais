@@ -1,74 +1,68 @@
-const mongoose = require('mongoose');
+// models/Business.js
+const mongoose = require("mongoose");
 
 const BusinessSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Por favor adicione um nome'],
+    required: [true, "O nome do estabelecimento é obrigatório"],
     trim: true,
-    maxlength: [50, 'Nome não pode ter mais que 50 caracteres']
   },
   description: {
     type: String,
-    required: [true, 'Por favor adicione uma descrição'],
-    maxlength: [500, 'Descrição não pode ter mais que 500 caracteres']
+    required: [true, "A descrição é obrigatória"],
+    maxlength: [500, "A descrição não pode ter mais de 500 caracteres"],
   },
+  phone: {
+    type: String,
+    required: [true, "O telefone é obrigatório"],
+  },
+  whatsapp: String,
+  photos: [String], // URLs das imagens (armazenadas no Cloudinary/S3)
+  video: String, // Embed do YouTube (ex: "https://youtu.be/...")
+  instagram: String,
+  facebook: String,
+  linkedin: String,
+  twitter: String,
+  tiktok: String,
   address: {
-    city: {
+    street: {
       type: String,
-      required: true
+      required: [true, "A rua é obrigatória"],
+    },
+    number: {
+      type: String,
+      required: [true, "O número é obrigatório"],
+    },
+    city: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "City",
+      required: [true, "Selecione uma cidade"],
     },
     neighborhood: {
-      type: String,
-      required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Neighborhood",
+      required: [true, "Selecione um bairro"],
     },
-    street: String,
-    number: String,
-    zipCode: String,
-    coordinates: {
-      lat: Number,
-      lng: Number
-    }
   },
   category: {
-    type: String,
-    required: true,
-    enum: [
-      'Restaurante', 'Loja', 'Serviço', 'Entretenimento', 
-      'Saúde', 'Educação', 'Automotivo', 'Outros'
-    ]
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: [true, "Selecione uma categoria"],
   },
   subCategory: {
-    type: String,
-    required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SubCategory",
+    required: [true, "Selecione uma subcategoria"],
   },
-  contact: {
-    phone: String,
-    whatsapp: String,
-    email: String,
-    website: String
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
-  socialMedia: {
-    facebook: String,
-    instagram: String,
-    twitter: String,
-    youtube: String
-  },
-  gallery: [String],
-  video: String,
-  openingHours: [
-    {
-      day: {
-        type: String,
-        enum: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-      },
-      hours: String,
-      open: Boolean
-    }
-  ],
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Business', BusinessSchema);
+module.exports = mongoose.model("Business", BusinessSchema);
