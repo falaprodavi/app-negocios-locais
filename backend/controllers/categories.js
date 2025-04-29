@@ -1,13 +1,20 @@
 const Category = require("../models/Category");
-const SubCategory = require("../models/SubCategory");
-const mongoose = require("mongoose");
+const { uploadCategoryIcon } = require("../utils/fileUpload");
+const fs = require("fs");
+const path = require("path");
 
-// @desc    Obter todas as categorias
+const deleteFile = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
+
+// @desc    Listar todas as categorias
 // @route   GET /api/categories
 // @access  Public
 exports.getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().sort("name");
     res.status(200).json({
       success: true,
       count: categories.length,
@@ -18,13 +25,21 @@ exports.getCategories = async (req, res, next) => {
   }
 };
 
-// @desc    Criar categoria
-// @route   POST /api/categories
-// @access  Private/Admin
-exports.createCategory = async (req, res, next) => {
+// @desc    Obter categoria por ID
+// @route   GET /api/categories/:id
+// @access  Public
+exports.getCategoryById = async (req, res, next) => {
   try {
-    const category = await Category.create(req.body);
-    res.status(201).json({
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Categoria não encontrada",
+      });
+    }
+
+    res.status(200).json({
       success: true,
       data: category,
     });
@@ -33,23 +48,154 @@ exports.createCategory = async (req, res, next) => {
   }
 };
 
+// @desc    Criar categoria (com verificação de existência inativa)
+// @route   POST /api/categories
+exports.createCategory = [
+  uploadCategoryIcon.single("icon"),
+  async (req, res, next) => {
+    try {
+      const { name } = req.body;
+
+      if (!name) {
+        if (req.file) deleteFile(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: "Por favor, forneça o nome da categoria",
+        });
+      }
+
+      // 1. Verifica se existe categoria ATIVA
+      const existingActive = await Category.findOne({
+        name: { $regex: new RegExp(`^${name}$`, "i") },
+        active: true,
+      });
+
+      if (existingActive) {
+        if (req.file) deleteFile(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: "Categoria já existe",
+        });
+      }
+
+      // 2. Verifica se existe categoria INATIVA
+      const existingInactive = await Category.findOne({
+        name: { $regex: new RegExp(`^${name}$`, "i") },
+        active: false,
+      });
+
+      if (existingInactive) {
+        const updateData = {
+          active: true,
+        };
+
+        if (req.file) {
+          if (existingInactive.icon) {
+            deleteFile(path.join("public", existingInactive.icon));
+          }
+          updateData.icon = `/uploads/categories/${req.file.filename}`;
+        }
+
+        const reactivatedCat = await Category.findByIdAndUpdate(
+          existingInactive._id,
+          updateData,
+          { new: true }
+        );
+
+        return res.status(200).json({
+          success: true,
+          data: reactivatedCat,
+          message: "Categoria reativada com sucesso",
+        });
+      }
+
+      // 3. Cria nova categoria
+      const newCategory = await Category.create({
+        name: name.toLowerCase(),
+        icon: req.file ? `/uploads/categories/${req.file.filename}` : null,
+        active: true,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: newCategory,
+        message: "Categoria criada com sucesso",
+      });
+    } catch (err) {
+      if (req.file) deleteFile(req.file.path);
+
+      if (err.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: "Categoria já existe",
+        });
+      }
+      next(err);
+    }
+  },
+];
+
 // @desc    Atualizar categoria
 // @route   PUT /api/categories/:id
 // @access  Private/Admin
-exports.updateCategory = async (req, res, next) => {
+exports.updateCategory = [
+  uploadCategoryIcon.single("icon"),
+  async (req, res, next) => {
+    try {
+      const { name } = req.body;
+      const updates = { name };
+      const category = await Category.findById(req.params.id);
+
+      if (!category) {
+        if (req.file) deleteFile(req.file.path);
+        return res.status(404).json({
+          success: false,
+          message: "Categoria não encontrada",
+        });
+      }
+
+      // Se enviou nova imagem
+      if (req.file) {
+        // Remove a imagem antiga se existir
+        if (category.icon) {
+          const oldPath = path.join("public", category.icon);
+          deleteFile(oldPath);
+        }
+        updates.icon = `/uploads/categories/${req.file.filename}`;
+      }
+
+      const updatedCategory = await Category.findByIdAndUpdate(
+        req.params.id,
+        updates,
+        { new: true, runValidators: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        data: updatedCategory,
+      });
+    } catch (err) {
+      if (req.file) deleteFile(req.file.path);
+      next(err);
+    }
+  },
+];
+
+// @desc    Desativar categoria (soft delete)
+// @route   DELETE /api/categories/:id
+exports.deleteCategory = async (req, res, next) => {
   try {
-    // Verifica se o ID é válido
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: "ID inválido" });
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID inválido",
+      });
     }
 
     const category = await Category.findByIdAndUpdate(
       req.params.id,
-      { name: req.body.name }, // Apenas o nome pode ser editado
-      {
-        new: true, // Retorna a categoria atualizada
-        runValidators: true, // Valida os dados antes de atualizar
-      }
+      { active: false },
+      { new: true }
     );
 
     if (!category) {
@@ -59,49 +205,10 @@ exports.updateCategory = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({ success: true, data: category });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// @desc    Deletar categoria
-// @route   DELETE /api/categories/:id
-// @access  Private/Admin
-exports.deleteCategory = async (req, res, next) => {
-  try {
-    // Verifica se o ID é válido
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: "ID inválido" });
-    }
-
-    // Verifica se a categoria existe
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Categoria não encontrada",
-      });
-    }
-
-    // Verifica se há subcategorias vinculadas (opcional)
-    const subCategoriesCount = await SubCategory.countDocuments({
-      category: req.params.id,
-    });
-
-    if (subCategoriesCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Não é possível excluir: existem subcategorias vinculadas",
-      });
-    }
-
-    await Category.findByIdAndDelete(req.params.id);
-
     res.status(200).json({
       success: true,
-      data: {},
-      message: "Categoria removida com sucesso",
+      data: category,
+      message: "Categoria desativada",
     });
   } catch (err) {
     next(err);

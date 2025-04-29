@@ -5,12 +5,20 @@ const CitySchema = new mongoose.Schema({
     type: String,
     required: [true, 'O nome da cidade é obrigatório'],
     unique: true,
-    trim: true
+    trim: true,
+    lowercase: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  image: {
+    type: String,
+    default: ''
+  },
+  active: {
+    type: Boolean,
+    default: true
   }
+}, { 
+  timestamps: true,
+  collation: { locale: 'pt', strength: 2 } // Busca case-insensitive
 });
 
 module.exports = mongoose.model('City', CitySchema);
