@@ -17,7 +17,7 @@ const FavoriteSchema = new mongoose.Schema({
   },
 });
 
-// Evitar duplicatas (usuário não pode favoritar o mesmo negócio 2x)
+// Prevent duplicate favorites
 FavoriteSchema.index({ user: 1, business: 1 }, { unique: true });
 
 module.exports = mongoose.model("Favorite", FavoriteSchema);
