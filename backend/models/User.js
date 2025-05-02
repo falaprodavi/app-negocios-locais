@@ -43,6 +43,14 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+// Adicione esta referência ao schema do User
+favorites: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Business",
+  },
+];
+
 // Criptografar senha antes de salvar
 UserSchema.pre("save", async function (next) {
   this.updatedAt = new Date();

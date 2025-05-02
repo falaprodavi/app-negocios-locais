@@ -1,3 +1,4 @@
+// models/Favorite.js
 const mongoose = require("mongoose");
 
 const FavoriteSchema = new mongoose.Schema({
@@ -17,7 +18,7 @@ const FavoriteSchema = new mongoose.Schema({
   },
 });
 
-// Prevent duplicate favorites
+// Impede favoritos duplicados
 FavoriteSchema.index({ user: 1, business: 1 }, { unique: true });
 
 module.exports = mongoose.model("Favorite", FavoriteSchema);

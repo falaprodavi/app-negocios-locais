@@ -42,9 +42,8 @@ app.use("/api/categories", require("./routes/categories"));
 app.use("/api/subCategories", require("./routes/subCategories"));
 
 app.use("/api/businesses", require("./routes/businesses"));
+
 app.use("/api/favorites", require("./routes/favorites"));
-
-
 
 // Conexão com MongoDB
 mongoose

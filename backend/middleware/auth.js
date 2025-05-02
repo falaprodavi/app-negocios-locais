@@ -6,7 +6,6 @@ const User = require("../models/User");
 exports.protect = async (req, res, next) => {
   let token;
 
-  // 1. Verificar se o token existe no header Authorization
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -22,10 +21,7 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    // 2. Verificar o token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 3. Verificar se o usuário ainda existe
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
@@ -34,7 +30,6 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // 4. Acesso concedido - usuário adicionado ao request
     req.user = currentUser;
     next();
   } catch (err) {
@@ -45,7 +40,7 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Middleware para autorizar por roles (admin, user, etc)
+// Middleware para autorizar por roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
