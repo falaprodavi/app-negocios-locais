@@ -44,6 +44,12 @@ const BusinessSchema = new mongoose.Schema({
       required: [true, "Selecione um bairro"],
     },
   },
+  lat: {
+    type: String,
+  },
+  long: {
+    type: String,
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",

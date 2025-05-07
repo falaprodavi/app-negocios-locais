@@ -1,15 +1,19 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import React from "react";
+import Navbar from "./components/Navbar";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Home from "./pages/Home";
 
 function App() {
-  const [count, setCount] = useState(0);
-
+  const isOwnerPath = useLocation().pathname.includes("owner");
   return (
-    <>
-      <h1 className="text-3xl font-bold">Hello world!</h1>
-    </>
+    <div>
+      {!isOwnerPath && <Navbar />}
+      <div className="min-h-[70vh]">
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 
