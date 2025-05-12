@@ -12,7 +12,8 @@ const { protect, authorize } = require("./middleware/auth");
 app.use(cors());
 app.use(express.json());
 
-app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
+// Servir arquivos estáticos (para as imagens)
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use((err, req, res, next) => {
   // Erros de duplicidade
@@ -41,9 +42,9 @@ app.use("/api/neighborhoods", require("./routes/neighborhoods"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/subCategories", require("./routes/subCategories"));
 
-app.use("/api/businesses", require("./routes/businesses"));
-
 app.use("/api/favorites", require("./routes/favorites"));
+
+app.use("/api/businesses", require("./routes/businesses"));
 
 // Conexão com MongoDB
 mongoose
@@ -60,9 +61,4 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
-});
-
-app.use((req, res, next) => {
-  console.log(`Rota acessada: ${req.method} ${req.path}`);
-  next();
 });

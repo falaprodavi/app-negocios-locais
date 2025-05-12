@@ -6,26 +6,34 @@ const {
   getBusiness,
   updateBusiness,
   deleteBusiness,
-  uploadBusinessPhotos,
-} = require("../controllers/businesses");
+  getLatestBusinesses,
+  searchBusinesses,
+  getBusinessBySlug
+} = require("../controllers/businessController");
+
 const { protect, authorize } = require("../middleware/auth");
-// Corrigindo a importação para usar fileUpload.js em vez de multer.js
-const { uploadBusinessPhotos: upload } = require("../utils/fileUpload");
+const { uploadBusinessCreate } = require("../utils/fileUpload");
 
-// Rotas públicas
-router.route("/").get(getBusinesses);
-router.route("/:id").get(getBusiness);
+router.get("/latest", getLatestBusinesses);
 
-// Rotas protegidas
-router.use(protect);
+// GET /api/businesses/search?name=padaria&city=São Paulo&category=restaurante
+router.get("/search", searchBusinesses);
+router.get("/slug/:slug", getBusinessBySlug);
 
-router.route("/").post(createBusiness);
-router.route("/:id").put(updateBusiness).delete(deleteBusiness);
-router.delete("/:id", protect, authorize("admin"), deleteBusiness);
 
-// Upload de fotos (múltiplos arquivos)
+
+// Protege criação, edição e exclusão
 router
-  .route("/:id/photos")
-  .put(upload.array("photos", 10), uploadBusinessPhotos);
+  .route("/")
+  .get(getBusinesses)
+  .post(protect, authorize("admin", "owner"), uploadBusinessCreate, createBusiness);
+
+router
+  .route("/:id")
+  .get(getBusiness)
+  .put(protect, authorize("admin", "owner"), updateBusiness)
+  .delete(protect, authorize("admin", "owner"), deleteBusiness);
+
+
 
 module.exports = router;

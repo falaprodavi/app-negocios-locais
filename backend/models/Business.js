@@ -1,5 +1,6 @@
 // models/Business.js
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const BusinessSchema = new mongoose.Schema({
   name: {
@@ -69,6 +70,17 @@ const BusinessSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  slug: {
+    type: String,
+    unique: true,
+  }
+});
+
+// Gera o slug automaticamente antes de salvar
+BusinessSchema.pre("save", function (next) {
+  if (!this.isModified("name")) return next();
+  this.slug = slugify(this.name, { lower: true, strict: true });
+  next();
 });
 
 module.exports = mongoose.model("Business", BusinessSchema);
