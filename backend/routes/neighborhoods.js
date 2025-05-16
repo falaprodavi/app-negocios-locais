@@ -1,26 +1,37 @@
 const express = require("express");
-const {
-  createNeighborhood,
-  getNeighborhoodsByCity,
-  updateNeighborhood,
-  deleteNeighborhood,
-  getNeighborhoods,
-} = require("../controllers/neighborhoods");
+const router = express.Router();
+const neighborhoods = require("../controllers/neighborhoods");
 const { protect, authorize } = require("../middleware/auth");
 
-const router = express.Router();
+// Listar todos os bairros
+router.get("/", neighborhoods.getNeighborhoods);
 
-// Rota para listar bairros por cidade
-router.get("/cities/:cityId/neighborhoods", getNeighborhoodsByCity);
+// Listar bairro por ID
+router.get("/id/:id", neighborhoods.getNeighborhoodById);
 
-// Rotas públicas
-router.get("/", getNeighborhoods);
+// Listar bairro por slug
+router.get("/slug/:slug", neighborhoods.getNeighborhoodBySlug);
 
-// Rotas protegidas (admin)
-router.post("/", protect, authorize("admin"), createNeighborhood);
+// Listar bairros por cidade
+router.get("/city/:cityId", neighborhoods.getNeighborhoodsByCity);
 
-router.put("/:id", protect, authorize("admin"), updateNeighborhood);
+// Criar bairro (protegido)
+router.post("/", protect, authorize("admin"), neighborhoods.createNeighborhood);
 
-router.delete("/:id", protect, authorize("admin"), deleteNeighborhood);
+// Atualizar bairro (protegido)
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  neighborhoods.updateNeighborhood
+);
+
+// Deletar bairro (protegido)
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  neighborhoods.deleteNeighborhood
+);
 
 module.exports = router;

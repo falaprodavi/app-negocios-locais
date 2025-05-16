@@ -1,9 +1,9 @@
-import api from '../axios';
+import api from "../axios";
 
-const CitiesService = {
+const CityService = {
   getAll: async () => {
     try {
-      const response = await api.get('/cities');
+      const response = await api.get("/cities");
       return response.data;
     } catch (error) {
       throw error;
@@ -12,7 +12,7 @@ const CitiesService = {
 
   getPopularCities: async () => {
     try {
-      const response = await api.get('/cities/popular');
+      const response = await api.get("/cities/popular");
       return response.data;
     } catch (error) {
       throw error;
@@ -21,7 +21,7 @@ const CitiesService = {
 
   getActiveCities: async () => {
     try {
-      const response = await api.get('/cities?active=true');
+      const response = await api.get("/cities?active=true");
       return response.data;
     } catch (error) {
       throw error;
@@ -29,4 +29,4 @@ const CitiesService = {
   },
 };
 
-export default CitiesService;
+export default CityService;

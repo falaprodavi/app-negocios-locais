@@ -1,81 +1,74 @@
 import React from "react";
+import { FaWhatsapp, FaInstagram, FaHeart, FaShareAlt } from "react-icons/fa";
 
-const Card = ({
-  title = "Sem nome",
-  description = "Sem descrição",
-  category = "Sem categoria",
-  imageUrl = "https://via.placeholder.com/400",
-  address = "",
-  phone = "",
-}) => {
+const Card = ({ business }) => {
   return (
-    <div>
-      <div className="relative h-48 w-full">
-        <span className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm text-slate-600 text-xs px-2 py-1 rounded z-10">
-          {category}
-        </span>
-        <img
-          className="h-full w-full object-cover"
-          src={imageUrl}
-          alt={title}
-          loading="lazy"
-        />
-      </div>
+    <div className="bg-white rounded shadow">
+      <header className="p-4">
+        <h3 className="text-lg font-bold">{business.name}</h3>
+        <p className="text-xs text-gray-400 uppercase">
+          <span>{business.category?.name || "Categoria"} - </span>
+          {business.address?.neighborhood?.name}, {business.address?.city?.name}
+        </p>
+      </header>
 
-      <div className="p-4 flex-1">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-500 mb-2 line-clamp-2">{description}</p>
-        {address && (
-          <p className="text-xs text-gray-400 mb-1 flex items-center">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            {address}
-          </p>
+      <section>
+        {business.photos?.[0] && (
+          <img
+            alt={business.name}
+            src={business.photos[0]}
+            className="w-full h-48 object-cover"
+          />
         )}
-      </div>
+        <p className="text-sm text-gray-600 p-4">
+          {business.description?.slice(0, 100)}...
+        </p>
+      </section>
 
-      <div className="p-4 border-t border-gray-100">
-        {phone && (
-          <a
-            href={`tel:${phone}`}
-            className="inline-flex items-center text-indigo-600 hover:text-indigo-800 text-sm"
-          >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      <footer className="p-4 flex justify-between items-center">
+        <a
+          href={`/business/${business._id}`}
+          className="uppercase font-bold text-sm text-blue-700 hover:underline"
+        >
+          Ver mais
+        </a>
+
+        <div className="flex space-x-3">
+          {/* WhatsApp - só mostra se tiver telefone */}
+          {business.phone && (
+            <a
+              href={`https://wa.me/${business.phone}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-              />
-            </svg>
-            {phone}
-          </a>
-        )}
-      </div>
+              <FaWhatsapp className="text-green-500 text-2xl" />
+            </a>
+          )}
+
+          {/* Instagram - só mostra se tiver perfil */}
+          {business.social?.instagram && (
+            <a
+              href={`https://instagram.com/${business.social.instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
+              <FaInstagram className="text-pink-600 text-2xl" />
+            </a>
+          )}
+
+          {/* Ícone de favorito */}
+          <button aria-label="Favoritar">
+            <FaHeart className="text-red-500 text-2xl" />
+          </button>
+
+          {/* Ícone de compartilhar */}
+          <button aria-label="Compartilhar">
+            <FaShareAlt className="text-gray-600 text-2xl" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -21,7 +21,7 @@ const Cities = () => {
           />
         </button>
       </div>
-      <div>
+      <div className="flex flex-col md:flex-row items-center justify-between w-full">
         <City />
       </div>
     </div>

@@ -1,8 +1,7 @@
-import api from '../axios';
+import api from "../axios";
 
 const BusinessService = {
-
-  getLatest: async (limit = 4) => {
+  getLatest: async (limit = 6) => {
     try {
       const response = await api.get(`/businesses/latest?limit=${limit}`);
       return response.data;
@@ -11,16 +10,25 @@ const BusinessService = {
     }
   },
 
-  getAll: async () => {
+  search: async (params) => {
     try {
-      const response = await api.get('/businesses');
+      const query = new URLSearchParams(params).toString();
+      const response = await api.get(`/businesses/search?${query}`);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  
+  getAll: async () => {
+    try {
+      const response = await api.get("/businesses");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getById: async (id) => {
     try {
       const response = await api.get(`/businesses/${id}`);
@@ -32,7 +40,7 @@ const BusinessService = {
 
   create: async (businessData) => {
     try {
-      const response = await api.post('/businesses', businessData);
+      const response = await api.post("/businesses", businessData);
       return response.data;
     } catch (error) {
       throw error;

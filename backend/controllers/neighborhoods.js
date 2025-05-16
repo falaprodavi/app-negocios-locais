@@ -1,241 +1,151 @@
 const Neighborhood = require("../models/Neighborhood");
 const City = require("../models/City");
+const slugify = require("slugify");
 
-// @desc    Criar bairro (com verificação de existência)
-// @route   POST /api/neighborhoods
-exports.createNeighborhood = async (req, res, next) => {
+exports.getAllNeighborhoods = async (req, res) => {
   try {
-    const { name, city } = req.body;
-
-    // Verificação básica dos campos
-    if (!name || !city) {
-      return res.status(400).json({
-        success: false,
-        message: "Por favor, forneça o nome do bairro e a cidade",
-      });
-    }
-
-    // 1. Verifica se já existe um bairro ATIVO
-    const existingActive = await Neighborhood.findOne({
-      name: { $regex: new RegExp(`^${name}$`, "i") },
-      city,
-      active: true,
-    });
-
-    if (existingActive) {
-      return res.status(400).json({
-        success: false,
-        message: "Bairro já existe nesta cidade",
-      });
-    }
-
-    // 2. Verifica se existe um bairro INATIVO (para reativar)
-    const existingInactive = await Neighborhood.findOne({
-      name: { $regex: new RegExp(`^${name}$`, "i") },
-      city,
-      active: false,
-    });
-
-    if (existingInactive) {
-      // Reativa o bairro existente
-      const reactivated = await Neighborhood.findByIdAndUpdate(
-        existingInactive._id,
-        { active: true },
-        { new: true }
-      );
-
-      return res.status(200).json({
-        success: true,
-        data: reactivated,
-        message: "Bairro reativado com sucesso",
-      });
-    }
-
-    // 3. Se não existir nenhum registro (nem ativo nem inativo), cria novo
-    const newNeighborhood = await Neighborhood.create({
-      name: name.toLowerCase(),
-      city,
-      active: true,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: newNeighborhood,
-      message: "Bairro criado com sucesso",
-    });
+    const neighborhoods = await Neighborhood.find().populate("city");
+    res.json(neighborhoods);
   } catch (err) {
-    // Tratamento de erros do MongoDB
-    if (err.name === "CastError") {
-      return res.status(400).json({
-        success: false,
-        message: "ID da cidade inválido",
-      });
-    }
-    next(err);
+    res.status(500).json({ error: "Erro ao buscar bairros." });
   }
 };
 
-// @desc    Listar bairros por cidade
-// @route   GET /api/cities/:cityId/neighborhoods
-exports.getNeighborhoodsByCity = async (req, res, next) => {
+exports.getNeighborhoodById = async (req, res) => {
   try {
-    console.log("Chegou no controller"); // Para debug
-
-    if (!req.params.cityId) {
-      return res.status(400).json({
-        success: false,
-        message: "ID da cidade não fornecido",
-      });
-    }
-
-    const neighborhoods = await Neighborhood.find({
-      city: req.params.cityId,
-      active: true,
-    }).populate("city", "name");
-
-    console.log("Bairros encontrados:", neighborhoods); // Para debug
-
-    if (!neighborhoods || neighborhoods.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nenhum bairro encontrado para esta cidade",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      count: neighborhoods.length,
-      data: neighborhoods,
-    });
-  } catch (err) {
-    console.error("Erro no controller:", err); // Para debug
-    next(err);
-  }
-};
-
-// @desc    Listar todas as subcategorias (com filtros)
-// @route   GET /api/bairros
-exports.getNeighborhoods = async (req, res, next) => {
-  try {
-    const { city, active } = req.query;
-    const query = {};
-
-    if (city) query.city = city;
-    if (active) query.active = active === "true";
-
-    const neighborhoods = await Neighborhood.find(query)
-      .populate("city", "name")
-      .sort("name");
-
-    res.status(200).json({
-      success: true,
-      count: neighborhoods.length,
-      data: neighborhoods,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// @desc    Atualizar bairro
-// @route   PUT /api/neighborhoods/:id
-exports.updateNeighborhood = async (req, res, next) => {
-  try {
-    // Verifica se req.body existe
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: "Nenhum dado fornecido para atualização",
-      });
-    }
-
-    const { name, city } = req.body;
-    const neighborhood = await Neighborhood.findById(req.params.id);
-
-    if (!neighborhood) {
-      return res.status(404).json({
-        success: false,
-        message: "Bairro não encontrado",
-      });
-    }
-
-    // Verifica nova cidade
-    if (city && city !== neighborhood.city.toString()) {
-      const newCity = await City.findById(city);
-      if (!newCity) {
-        return res.status(400).json({
-          success: false,
-          message: "Cidade inválida",
-        });
-      }
-    }
-
-    // Verifica duplicata
-    if (name) {
-      const existingNeighborhood = await Neighborhood.findOne({
-        name: { $regex: new RegExp(`^${name}$`, "i") },
-        city: city || neighborhood.city,
-        _id: { $ne: neighborhood._id },
-      });
-
-      if (existingNeighborhood) {
-        return res.status(400).json({
-          success: false,
-          message: "Bairro já existe nesta cidade",
-        });
-      }
-      neighborhood.name = name.toLowerCase();
-    }
-
-    if (city) neighborhood.city = city;
-    await neighborhood.save();
-
-    res.status(200).json({
-      success: true,
-      data: neighborhood,
-    });
-  } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(400).json({
-        success: false,
-        message: "ID inválido",
-      });
-    }
-    next(err);
-  }
-};
-
-// @desc    Desativar bairro (soft delete)
-// @route   DELETE /api/neighborhoods/:id
-exports.deleteNeighborhood = async (req, res, next) => {
-  try {
-    // Verifica se o ID é válido
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        message: "ID inválido",
-      });
-    }
-
-    const neighborhood = await Neighborhood.findByIdAndUpdate(
-      req.params.id,
-      { active: false },
-      { new: true }
+    const neighborhood = await Neighborhood.findById(req.params.id).populate(
+      "city"
     );
+    if (!neighborhood)
+      return res.status(404).json({ error: "Bairro não encontrado." });
+    res.json(neighborhood);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar bairro por ID." });
+  }
+};
 
-    if (!neighborhood) {
-      return res.status(404).json({
-        success: false,
-        message: "Bairro não encontrado",
-      });
+exports.getNeighborhoodBySlug = async (req, res) => {
+  try {
+    const neighborhood = await Neighborhood.findOne({
+      slug: req.params.slug,
+    }).populate("city");
+    if (!neighborhood)
+      return res.status(404).json({ error: "Bairro não encontrado." });
+    res.json(neighborhood);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar bairro por slug." });
+  }
+};
+
+exports.getNeighborhoodsByCity = async (req, res) => {
+  try {
+    const cityId = req.params.cityId;
+    const neighborhoods = await Neighborhood.find({ city: cityId }).populate(
+      "city"
+    );
+    res.json(neighborhoods);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar bairros por cidade." });
+  }
+};
+
+exports.createNeighborhood = async (req, res) => {
+  try {
+    const { name, city } = req.body;
+
+    if (!name || !city) {
+      return res
+        .status(400)
+        .json({ error: "Os campos 'name' e 'city' são obrigatórios." });
     }
 
-    res.status(200).json({
-      success: true,
-      data: neighborhood,
-      message: "Bairro desativado",
-    });
+    // Verifica se a cidade existe
+    const cityExists = await City.findById(city);
+    if (!cityExists) {
+      return res.status(404).json({ error: "Cidade não encontrada." });
+    }
+
+    const slug = slugify(name, { lower: true, strict: true });
+
+    const neighborhood = new Neighborhood({ name, slug, city });
+    await neighborhood.save();
+    res.status(201).json(neighborhood);
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(400).json({
+      error: "Erro ao criar bairro.",
+      detail: err.message,
+    });
+  }
+};
+
+exports.updateNeighborhood = async (req, res) => {
+  try {
+    const { name, city } = req.body;
+
+    const updateData = {};
+    if (name) {
+      updateData.name = name;
+      updateData.slug = slugify(name, { lower: true, strict: true });
+    }
+    if (city) {
+      // Verifica se a nova cidade existe
+      const cityExists = await City.findById(city);
+      if (!cityExists) {
+        return res.status(404).json({ error: "Cidade não encontrada." });
+      }
+      updateData.city = city;
+    }
+
+    const updatedNeighborhood = await Neighborhood.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate("city");
+
+    if (!updatedNeighborhood) {
+      return res.status(404).json({ error: "Bairro não encontrado." });
+    }
+
+    res.json(updatedNeighborhood);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({
+      error: "Erro ao atualizar bairro.",
+      detail: err.message,
+    });
+  }
+};
+
+exports.deleteNeighborhood = async (req, res) => {
+  try {
+    const neighborhood = await Neighborhood.findById(req.params.id);
+    if (!neighborhood)
+      return res.status(404).json({ error: "Bairro não encontrado." });
+
+    await neighborhood.deleteOne();
+    res.json({ message: "Bairro deletado com sucesso." });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao deletar bairro." });
+  }
+};
+
+exports.getNeighborhoods = async (req, res) => {
+  try {
+    const { city } = req.query;
+    let filter = {};
+
+    if (city) {
+      // Verifica se a cidade existe pelo slug
+      const cityDoc = await City.findOne({ slug: city });
+      if (cityDoc) {
+        filter.city = cityDoc._id;
+      }
+    }
+
+    const neighborhoods = await Neighborhood.find(filter).populate("city");
+    res.json(neighborhoods);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

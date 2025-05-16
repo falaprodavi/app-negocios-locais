@@ -4,7 +4,6 @@ const Category = require("../models/Category");
 const SubCategory = require("../models/SubCategory");
 const Business = require("../models/Business");
 
-
 // Criar um novo estabelecimento
 exports.createBusiness = async (req, res) => {
   try {
@@ -37,9 +36,62 @@ exports.getBusinesses = async (req, res) => {
   }
 };
 
+const searchBusinesses = async (req, res) => {
+  try {
+    const {
+      name,
+      citySlug,
+      neighborhoodSlug,
+      categorySlug,
+      subCategorySlug,
+    } = req.query;
+
+    const filter = {};
+
+    if (citySlug) {
+      const city = await City.findOne({ slug: citySlug });
+      if (city) filter["address.city"] = city._id;
+    }
+
+    if (neighborhoodSlug) {
+      const neighborhood = await Neighborhood.findOne({
+        slug: neighborhoodSlug,
+      });
+      if (neighborhood) filter["address.neighborhood"] = neighborhood._id;
+    }
+
+    if (categorySlug) {
+      const category = await Category.findOne({ slug: categorySlug });
+      if (category) filter.category = category._id;
+    }
+
+    if (subCategorySlug) {
+      const subCategory = await SubCategory.findOne({ slug: subCategorySlug });
+      if (subCategory) filter.subCategory = subCategory._id;
+    }
+
+    if (name) {
+      filter.name = { $regex: name, $options: "i" }; // busca parcial e case-insensitive
+    }
+
+    const businesses = await Business.find(filter)
+      .populate("category")
+      .populate("subCategory")
+      .populate("address.city")
+      .populate("address.neighborhood");
+
+    res.json({ success: true, data: businesses });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao buscar estabelecimentos" });
+  }
+};
+
 // Buscar os últimos estabelecimentos cadastrados
 exports.getLatestBusinesses = async (req, res) => {
-  const limit = parseInt(req.query.limit) || 4;
+  const limit = parseInt(req.query.limit) || 6;
   try {
     const businesses = await Business.find()
       .sort({ createdAt: -1 })
@@ -69,17 +121,46 @@ exports.getBusiness = async (req, res) => {
 };
 
 // Atualizar um estabelecimento
+// Atualizar um estabelecimento
 exports.updateBusiness = async (req, res) => {
   try {
-    const updated = await Business.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    let updateData = { ...req.body };
+
+    // Se houver arquivos enviados, processá-los
+    if (req.files && req.files.length > 0) {
+      const photos = req.files.map(
+        (file) =>
+          `${req.protocol}://${req.get("host")}/uploads/businesses/${
+            file.filename
+          }`
+      );
+
+      // Se for para adicionar às fotos existentes
+      if (req.body.photosAction === "append") {
+        const business = await Business.findById(req.params.id);
+        updateData.photos = [...business.photos, ...photos];
+      }
+      // Se for para substituir todas as fotos
+      else {
+        updateData.photos = photos;
+      }
+    }
+
+    const updated = await Business.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
     if (!updated) {
       return res
         .status(404)
         .json({ success: false, message: "Estabelecimento não encontrado" });
     }
+
     res.json({ success: true, data: updated });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -104,54 +185,139 @@ exports.deleteBusiness = async (req, res) => {
   }
 };
 
-exports.searchBusinesses = async (req, res) => {
+/* exports.searchBusinesses = async (req, res) => {
   try {
-    const { name, city, category, neighborhood, subCategory } = req.query;
-    const query = {};
+    const { name, city, neighborhood, category, subcategory } = req.query;
+    const filter = {};
 
-    // Busca por nome parcial (regex, insensível a maiúsculas)
-    if (name) query.name = { $regex: name, $options: "i" };
+    if (name) filter.name = { $regex: name, $options: "i" };
 
-    // Buscar cidade por nome (e incluir ID no query)
     if (city) {
-      const cityDoc = await City.findOne({
-        name: { $regex: city, $options: "i" },
-      });
-      if (cityDoc) query["address.city"] = cityDoc._id;
+      const cityDoc = await City.findOne({ slug: city });
+      if (cityDoc) filter["address.city"] = cityDoc._id;
     }
 
-    // Buscar bairro por nome
     if (neighborhood) {
       const neighborhoodDoc = await Neighborhood.findOne({
-        name: { $regex: neighborhood, $options: "i" },
+        slug: neighborhood,
       });
-      if (neighborhoodDoc) query["address.neighborhood"] = neighborhoodDoc._id;
+      if (neighborhoodDoc) filter["address.neighborhood"] = neighborhoodDoc._id;
     }
 
-    // Buscar categoria por nome
     if (category) {
-      const categoryDoc = await Category.findOne({
-        name: { $regex: category, $options: "i" },
-      });
-      if (categoryDoc) query.category = categoryDoc._id;
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) filter.category = categoryDoc._id;
     }
 
-    // Buscar subcategoria por nome
-    if (subCategory) {
-      const subCategoryDoc = await SubCategory.findOne({
-        name: { $regex: subCategory, $options: "i" },
-      });
-      if (subCategoryDoc) query.subCategory = subCategoryDoc._id;
+    if (subcategory) {
+      const subCategoryDoc = await SubCategory.findOne({ slug: subcategory });
+      if (subCategoryDoc) filter.subCategory = subCategoryDoc._id;
     }
 
-    const results = await Business.find(query).populate(
-      "category subCategory address.city address.neighborhood"
-    );
+    const businesses = await Business.find(filter)
+      .populate("category subCategory address.city address.neighborhood owner")
+      .lean();
 
-    res.json({ success: true, data: results });
+    // Formatar os dados para o frontend
+    const formattedBusinesses = businesses.map((business) => ({
+      ...business,
+      citySlug: business.address.city?.slug,
+      neighborhoodSlug: business.address.neighborhood?.slug,
+      categorySlug: business.category?.slug,
+      subCategorySlug: business.subCategory?.slug,
+    }));
+
+    res.json({ success: true, data: formattedBusinesses });
   } catch (error) {
-    console.error("Erro na busca:", error);
-    res.status(500).json({ success: false, message: "Erro no servidor" });
+    console.error("Search error:", error);
+    res.status(500).json({ success: false, message: "Erro na busca" });
+  }
+}; */
+
+exports.searchBusinesses = async (req, res) => {
+  try {
+    const {
+      name,
+      city,
+      neighborhood,
+      category,
+      subcategory,
+      page = 1, // Adicionado
+      perPage = 9, // Adicionado
+    } = req.query;
+
+    const filter = {};
+
+    // Filtros existentes (mantidos iguais)
+    if (name) filter.name = { $regex: name, $options: "i" };
+
+    if (city) {
+      const cityDoc = await City.findOne({ slug: city });
+      if (cityDoc) filter["address.city"] = cityDoc._id;
+    }
+
+    if (neighborhood) {
+      const neighborhoodDoc = await Neighborhood.findOne({
+        slug: neighborhood,
+      });
+      if (neighborhoodDoc) filter["address.neighborhood"] = neighborhoodDoc._id;
+    }
+
+    if (category) {
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) filter.category = categoryDoc._id;
+    }
+
+    if (subcategory) {
+      const subCategoryDoc = await SubCategory.findOne({ slug: subcategory });
+      if (subCategoryDoc) filter.subCategory = subCategoryDoc._id;
+    }
+
+    // Cálculos de paginação
+    const currentPage = parseInt(page);
+    const itemsPerPage = parseInt(perPage);
+    const skip = (currentPage - 1) * itemsPerPage;
+
+    // Busca paginada (usando Promise.all para performance)
+    const [businesses, totalCount] = await Promise.all([
+      Business.find(filter)
+        .skip(skip)
+        .limit(itemsPerPage)
+        .populate(
+          "category subCategory address.city address.neighborhood owner"
+        )
+        .lean(),
+
+      Business.countDocuments(filter), // Conta o total de documentos
+    ]);
+
+    // Formatação dos resultados
+    const formattedBusinesses = businesses.map((business) => ({
+      ...business,
+      citySlug: business.address.city?.slug,
+      neighborhoodSlug: business.address.neighborhood?.slug,
+      categorySlug: business.category?.slug,
+      subCategorySlug: business.subCategory?.slug,
+    }));
+
+    // Resposta com metadados de paginação
+    res.json({
+      success: true,
+      data: formattedBusinesses,
+      pagination: {
+        page: currentPage,
+        perPage: itemsPerPage,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / itemsPerPage),
+      },
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro na busca",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 

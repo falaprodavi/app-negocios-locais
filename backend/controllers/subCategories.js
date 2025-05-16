@@ -1,7 +1,8 @@
 const SubCategory = require("../models/SubCategory");
-const { uploadSubCategoryIcon } = require("../utils/fileUpload");
+const Category = require("../models/Category");
 const fs = require("fs");
 const path = require("path");
+const slugify = require("slugify");
 
 // Helper para deletar arquivos
 const deleteFile = (filePath) => {
@@ -10,107 +11,7 @@ const deleteFile = (filePath) => {
   }
 };
 
-// @desc    Criar subcategoria (com verificação de existência inativa)
-// @route   POST /api/subcategories
-exports.createSubCategory = [
-  uploadSubCategoryIcon.single("icon"),
-  async (req, res, next) => {
-    try {
-      const { name, category } = req.body;
-
-      // Verificação básica dos campos
-      if (!name || !category) {
-        if (req.file) deleteFile(req.file.path);
-        return res.status(400).json({
-          success: false,
-          message: "Por favor, forneça o nome da subcategoria e a categoria",
-        });
-      }
-
-      // 1. Verifica se já existe uma subcategoria ATIVA
-      const existingActive = await SubCategory.findOne({
-        name: { $regex: new RegExp(`^${name}$`, "i") },
-        category,
-        active: true,
-      });
-
-      if (existingActive) {
-        if (req.file) deleteFile(req.file.path);
-        return res.status(400).json({
-          success: false,
-          message: "Subcategoria já existe nesta categoria",
-        });
-      }
-
-      // 2. Verifica se existe uma subcategoria INATIVA (para reativar)
-      const existingInactive = await SubCategory.findOne({
-        name: { $regex: new RegExp(`^${name}$`, "i") },
-        category,
-        active: false,
-      });
-
-      if (existingInactive) {
-        // Prepara os dados para atualização
-        const updateData = {
-          active: true,
-        };
-
-        // Se foi enviado um novo ícone, atualiza o caminho
-        if (req.file) {
-          // Remove o ícone antigo se existir
-          if (existingInactive.icon) {
-            deleteFile(
-              existingInactive.icon.replace("/uploads/subcategories/", "")
-            );
-          }
-          updateData.icon = `/uploads/subcategories/${req.file.filename}`;
-        }
-
-        // Reativa a subcategoria existente
-        const reactivatedSub = await SubCategory.findByIdAndUpdate(
-          existingInactive._id,
-          updateData,
-          { new: true }
-        );
-
-        return res.status(200).json({
-          success: true,
-          data: reactivatedSub,
-          message: "Subcategoria reativada com sucesso",
-        });
-      }
-
-      // 3. Se não existir nenhum registro (nem ativo nem inativo), cria novo
-      const newSubCategory = await SubCategory.create({
-        name: name.toLowerCase(),
-        category,
-        icon: req.file ? `/uploads/subcategories/${req.file.filename}` : "",
-        active: true,
-      });
-
-      res.status(201).json({
-        success: true,
-        data: newSubCategory,
-        message: "Subcategoria criada com sucesso",
-      });
-    } catch (err) {
-      if (req.file) deleteFile(req.file.path);
-
-      // Tratamento de erros do MongoDB
-      if (err.name === "CastError") {
-        return res.status(400).json({
-          success: false,
-          message: "ID da categoria inválido",
-        });
-      }
-      next(err);
-    }
-  },
-];
-
-// @desc    Listar todas as subcategorias (com filtros)
-// @route   GET /api/subcategories
-exports.getSubCategories = async (req, res, next) => {
+exports.getAllSubCategories = async (req, res) => {
   try {
     const { category, active } = req.query;
     const query = {};
@@ -119,64 +20,184 @@ exports.getSubCategories = async (req, res, next) => {
     if (active) query.active = active === "true";
 
     const subCategories = await SubCategory.find(query)
-      .populate("category", "name")
+      .populate("category", "name slug")
       .sort("name");
 
-    res.status(200).json({
-      success: true,
-      count: subCategories.length,
-      data: subCategories,
-    });
+    res.json(subCategories);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: "Erro ao buscar subcategorias." });
   }
 };
 
-// @desc    Atualizar subcategoria
-// @route   PUT /api/subcategories/:id
-exports.updateSubCategory = [
-  uploadSubCategoryIcon.single("icon"),
-  async (req, res, next) => {
-    try {
-      const { name, category, active } = req.body;
-      const subCategory = await SubCategory.findById(req.params.id);
-
-      if (!subCategory) {
-        if (req.file) deleteFile(req.file.path);
-        return res.status(404).json({
-          success: false,
-          message: "Subcategoria não encontrada",
-        });
-      }
-
-      // Atualizações
-      if (name) subCategory.name = name.toLowerCase();
-      if (category) subCategory.category = category;
-      if (active !== undefined) subCategory.active = active;
-
-      // Atualiza ícone se fornecido
-      if (req.file) {
-        if (subCategory.icon) deleteFile(subCategory.icon);
-        subCategory.icon = `/uploads/subcategories/${req.file.filename}`;
-      }
-
-      await subCategory.save();
-
-      res.status(200).json({
-        success: true,
-        data: subCategory,
-      });
-    } catch (err) {
-      if (req.file) deleteFile(req.file.path);
-      next(err);
-    }
-  },
-];
-
-// @desc    Excluir subcategoria (soft delete)
-// @route   DELETE /api/subcategories/:id
-exports.deleteSubCategory = async (req, res, next) => {
+exports.getSubCategoryById = async (req, res) => {
   try {
+    const subCategory = await SubCategory.findById(req.params.id).populate(
+      "category",
+      "name slug"
+    );
+
+    if (!subCategory) {
+      return res.status(404).json({ error: "Subcategoria não encontrada." });
+    }
+    res.json(subCategory);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar subcategoria por ID." });
+  }
+};
+
+exports.getSubCategoryBySlug = async (req, res) => {
+  try {
+    const subCategory = await SubCategory.findOne({
+      slug: req.params.slug,
+    }).populate("category", "name slug");
+
+    if (!subCategory) {
+      return res.status(404).json({ error: "Subcategoria não encontrada." });
+    }
+    res.json(subCategory);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar subcategoria por slug." });
+  }
+};
+
+exports.getSubCategoriesByCategory = async (req, res) => {
+  try {
+    const { categorySlug } = req.params;
+
+    // Encontra a categoria pelo slug para obter o ID
+    const category = await Category.findOne({ slug: categorySlug });
+
+    if (!category) {
+      return res.status(404).json({ error: "Categoria não encontrada." });
+    }
+
+    const subCategories = await SubCategory.find({
+      category: category._id,
+      active: true,
+    }).select("name slug icon");
+
+    res.json(subCategories);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Erro ao buscar subcategorias por categoria." });
+  }
+};
+
+exports.createSubCategory = async (req, res) => {
+  try {
+    const { name, category } = req.body;
+    const icon = req.file
+      ? `/uploads/subcategories/${req.file.filename}`
+      : null;
+
+    if (!name || !category) {
+      if (req.file) deleteFile(req.file.path);
+      return res.status(400).json({
+        error: "Os campos 'name' e 'category' são obrigatórios.",
+      });
+    }
+
+    // Verifica se a categoria existe
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      if (req.file) deleteFile(req.file.path);
+      return res.status(404).json({ error: "Categoria não encontrada." });
+    }
+
+    // Verifica se já existe uma subcategoria com o mesmo nome para esta categoria
+    const existingSubCategory = await SubCategory.findOne({
+      name: { $regex: new RegExp(`^${name}$`, "i") },
+      category,
+    });
+
+    if (existingSubCategory) {
+      if (existingSubCategory.active) {
+        if (req.file) deleteFile(req.file.path);
+        return res.status(400).json({
+          error: "Subcategoria já existe nesta categoria.",
+        });
+      } else {
+        // Reativa a subcategoria existente
+        existingSubCategory.active = true;
+        if (icon) {
+          if (existingSubCategory.icon) deleteFile(existingSubCategory.icon);
+          existingSubCategory.icon = icon;
+        }
+        await existingSubCategory.save();
+        return res.status(200).json(existingSubCategory);
+      }
+    }
+
+    // Cria nova subcategoria
+    const subCategory = new SubCategory({
+      name,
+      category,
+      icon,
+      active: true,
+    });
+
+    await subCategory.save();
+    res.status(201).json(subCategory);
+  } catch (err) {
+    if (req.file) deleteFile(req.file.path);
+    res.status(400).json({
+      error: "Erro ao criar subcategoria.",
+      detail: err.message,
+    });
+  }
+};
+
+exports.updateSubCategory = async (req, res) => {
+  try {
+    const { name, category, active } = req.body;
+    const icon = req.file
+      ? `/uploads/subcategories/${req.file.filename}`
+      : undefined;
+
+    const subCategory = await SubCategory.findById(req.params.id);
+    if (!subCategory) {
+      if (req.file) deleteFile(req.file.path);
+      return res.status(404).json({ error: "Subcategoria não encontrada." });
+    }
+
+    // Atualizações
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (category) {
+      // Verifica se a nova categoria existe
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        if (req.file) deleteFile(req.file.path);
+        return res.status(404).json({ error: "Categoria não encontrada." });
+      }
+      updateData.category = category;
+    }
+    if (active !== undefined) updateData.active = active;
+    if (icon) {
+      if (subCategory.icon) deleteFile(subCategory.icon);
+      updateData.icon = icon;
+    }
+
+    const updatedSubCategory = await SubCategory.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate("category", "name slug");
+
+    res.json(updatedSubCategory);
+  } catch (err) {
+    if (req.file) deleteFile(req.file.path);
+    res.status(400).json({
+      error: "Erro ao atualizar subcategoria.",
+      detail: err.message,
+    });
+  }
+};
+
+exports.deleteSubCategory = async (req, res) => {
+  try {
+    // Soft delete (marca como inativo)
     const subCategory = await SubCategory.findByIdAndUpdate(
       req.params.id,
       { active: false },
@@ -184,18 +205,56 @@ exports.deleteSubCategory = async (req, res, next) => {
     );
 
     if (!subCategory) {
-      return res.status(404).json({
-        success: false,
-        message: "Subcategoria não encontrada",
-      });
+      return res.status(404).json({ error: "Subcategoria não encontrada." });
     }
 
-    res.status(200).json({
-      success: true,
-      data: subCategory,
-      message: "Subcategoria desativada",
+    res.json({
+      message: "Subcategoria desativada com sucesso.",
+      subCategory,
     });
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: "Erro ao desativar subcategoria." });
+  }
+};
+
+exports.hardDeleteSubCategory = async (req, res) => {
+  try {
+    const subCategory = await SubCategory.findById(req.params.id);
+
+    if (!subCategory) {
+      return res.status(404).json({ error: "Subcategoria não encontrada." });
+    }
+
+    // Remove o ícone se existir
+    if (subCategory.icon) {
+      deleteFile(subCategory.icon);
+    }
+
+    // Deleta permanentemente
+    await subCategory.deleteOne();
+
+    res.json({ message: "Subcategoria deletada permanentemente com sucesso." });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao deletar subcategoria." });
+  }
+};
+
+exports.getSubCategories = async (req, res) => {
+  try {
+    const { category } = req.query;
+    let filter = {};
+
+    if (category) {
+      // Verifica se a categoria existe pelo slug
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) {
+        filter.category = categoryDoc._id;
+      }
+    }
+
+    const subCategories = await SubCategory.find(filter).populate("category");
+    res.json(subCategories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

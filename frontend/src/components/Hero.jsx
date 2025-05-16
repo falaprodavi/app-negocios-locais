@@ -6,30 +6,30 @@ const Hero = () => {
     "São José dos Campos",
     "Taubaté",
     "Jacareí",
-    "Pindamonhangaba",
-    "Guaratinguetá",
-    "Lorena",
-    "Cruzeiro",
-    "Caçapava",
-    "Campos do Jordão",
-    "Aparecida",
+    // ... outras cidades
   ];
 
   return (
-    <div className="flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center h-[85vh]">
-      <span className="text-xs md:text-sm bg-blue-500/50 px-3.5 py-1 rounded-full mt-20">
-        Os melhores estabelecimentos do Vale do Paraíba
-      </span>
+    <div className="relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center min-h-[85vh]">
+      <div className="absolute inset-0 bg-black/50"></div>
 
-      <h1 className="text-4xl md:text-5xl md:leading-[56px] font-bold max-w-xl mt-4">
-        Encontre tudo que deseja no Vale
-      </h1>
+      <div className="relative z-10 w-full max-w-6xl text-center">
+        <span className="inline-block text-xs md:text-sm bg-blue-500 px-3.5 py-1 rounded-full mb-4">
+          Os melhores estabelecimentos do Vale do Paraíba
+        </span>
 
-      <p className="max-w-xl mt-2 text-sm md:text-base">
-        {cities.join(", ")} e muito mais
-      </p>
+        <h1 className="text-3xl md:text-5xl font-bold mb-4">
+          Encontre tudo que deseja no Vale
+        </h1>
 
-      <SearchForm />
+        <p className="text-sm md:text-base mb-8 max-w-2xl mx-auto">
+          {cities.join(", ")} e muito mais
+        </p>
+
+        <div className="w-full flex justify-center">
+          <SearchForm />
+        </div>
+      </div>
     </div>
   );
 };

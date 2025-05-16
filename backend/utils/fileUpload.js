@@ -16,6 +16,19 @@ const categoryStorage = multer.diskStorage({
   },
 });
 
+const cityStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "public/uploads/cities";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName =
+      "cities-" + Date.now() + path.extname(file.originalname);
+    cb(null, uniqueName);
+  },
+});
+
 // Configuração para SUBCATEGORIAS
 const subCategoryStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -30,16 +43,38 @@ const subCategoryStorage = multer.diskStorage({
   },
 });
 
-// Configuração para CIDADES
-const cityStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "public/uploads/cities";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+// Configuração para ícones de subcategorias
+const subCategoryIconStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join("public", "uploads", "subcategories"));
   },
-  filename: (req, file, cb) => {
-    const uniqueName = "city-" + Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
+});
+
+const uploadSubCategoryIcon = multer({
+  storage: subCategoryIconStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png|svg/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(
+      new Error(
+        "Apenas arquivos de imagem são permitidos (jpeg, jpg, png, svg)"
+      )
+    );
   },
 });
 
@@ -74,14 +109,14 @@ module.exports = {
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   }),
 
-  uploadSubCategoryIcon: multer({
-    storage: subCategoryStorage,
+  uploadCityImage: multer({
+    storage: cityStorage,
     fileFilter,
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   }),
 
-  uploadCityImage: multer({
-    storage: cityStorage,
+  uploadSubCategoryIcon: multer({
+    storage: subCategoryStorage,
     fileFilter,
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   }),
@@ -91,6 +126,8 @@ module.exports = {
     fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB para fotos de estabelecimentos
   }),
+
+  uploadSubCategoryIcon,
 
   uploadBusinessCreate: multer({
     storage: businessStorage,

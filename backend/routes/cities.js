@@ -1,24 +1,39 @@
 const express = require("express");
-const {
-  getCities,
-  getCityById,
-  createCity,
-  updateCity,
-  deleteCity,
-  getPopularCities, // Adicione esta importação
-} = require("../controllers/cities");
+const router = express.Router();
+const cities = require("../controllers/cities");
+const { uploadCityImage } = require("../utils/fileUpload");
 const { protect, authorize } = require("../middleware/auth");
 
-const router = express.Router();
+// Listar todas
+router.get("/", cities.getAllCities);
 
-// Rotas públicas
-router.get("/", getCities);
-router.get("/popular", getPopularCities); // Use o controller
-router.get("/:id", getCityById);
+router.get("/popular", cities.getPopularCities);
 
-// Rotas protegidas (admin)
-router.post("/", protect, authorize("admin"), createCity);
-router.put("/:id", protect, authorize("admin"), updateCity);
-router.delete("/:id", protect, authorize("admin"), deleteCity);
+// Listar por ID
+router.get("/id/:id", cities.getCityById);
+
+// Listar por slug
+router.get("/slug/:slug", cities.getCityBySlug);
+
+// Criar categoria (protegido)
+router.post(
+  "/",
+  protect,
+  authorize("admin"), // remova isso se quiser permitir para todos os logados
+  uploadCityImage.single("image"),
+  cities.createCity
+);
+
+// Atualizar categoria (protegido)
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  uploadCityImage.single("image"),
+  cities.updateCity
+);
+
+// Deletar categoria (protegido)
+router.delete("/:id", protect, authorize("admin"), cities.deleteCity);
 
 module.exports = router;

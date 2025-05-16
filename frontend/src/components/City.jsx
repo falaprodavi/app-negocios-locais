@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import useApi from "../hooks/useApi";
-import CitiesService from "../api/services/cities";
+import CityService from "../api/services/city";
 
 const City = () => {
-  const { data, loading, error } = useApi(CitiesService.getPopularCities);
+  const { data, loading, error } = useApi(CityService.getPopularCities);
 
   if (loading)
     return (
@@ -36,7 +36,7 @@ const City = () => {
               </span>
               <div className="overflow-hidden rounded-t-md h-48">
                 <img
-                  src={`${import.meta.env.VITE_API_BASE_URL}${city.image}`}
+                  src={city.image}
                   alt={city.name}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
