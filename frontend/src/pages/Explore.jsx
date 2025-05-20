@@ -44,6 +44,9 @@ const Explore = () => {
 
       queryParams.set("perPage", pagination.perPage);
 
+      // ADICIONE ESTA LINHA PARA ORDENAÇÃO ALEATÓRIA (logo acima da chamada da API)
+      queryParams.set("random", "true");
+
       const res = await api.get(`/businesses/search?${queryParams.toString()}`);
 
       setResults(res.data.data);

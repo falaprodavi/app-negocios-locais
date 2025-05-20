@@ -5,6 +5,10 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Link } from "react-router-dom";
 
 const Card = ({ business, loading = false }) => {
+  const cleanPhoneNumber = (whatsapp) => {
+    return whatsapp.replace(/\D/g, ""); // Remove tudo que não é dígito
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded shadow">
@@ -42,7 +46,7 @@ const Card = ({ business, loading = false }) => {
     <div className="bg-white rounded shadow">
       <header className="p-4">
         <h3 className="text-lg font-bold">{business.name}</h3>
-        <p className="text-xs text-gray-400 uppercase">
+        <p className="text-[10px] text-gray-400 uppercase">
           <span>{business.category?.name || "Categoria"} - </span>
           {business.address?.neighborhood?.name}, {business.address?.city?.name}
         </p>
@@ -62,20 +66,19 @@ const Card = ({ business, loading = false }) => {
       </section>
 
       <footer className="p-4 flex justify-between items-center">
-        <Link to={`/business/${business.slug}`}>
-          {/* Conteúdo do card */}oi
-        </Link>
-        <a
-          href={`/business/${business._id}`}
+        <Link
+          to={`/business/${business.slug}`}
           className="uppercase font-bold text-sm text-blue-700 hover:underline"
         >
-          Ver mais
-        </a>
+          VER MAIS
+        </Link>
 
         <div className="flex space-x-3">
           {business.phone && (
             <a
-              href={`https://wa.me/${business.phone}`}
+              href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
+                business.whatsapp
+              )}&text=Encontrei+sua+empresa+no+XYZ&type=phone_number&app_absent=0`}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"

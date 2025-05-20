@@ -66,19 +66,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <FooterSection title="COMPANY" links={companyLinks} />
-        <FooterSection title="SUPPORT" links={supportLinks} />
+        <FooterSection title="CIDADES" links={companyLinks} />
+        <FooterSection title="GATEGORIAS" links={supportLinks} />
 
         <div className="max-w-80">
-          <h3 className="text-lg text-gray-800">STAY UPDATED</h3>
+          <h3 className="text-lg text-gray-800">FIQUE ATUALIZADO</h3>
           <p className="mt-3 text-sm">
-            Subscribe to our newsletter for inspiration and special offers.
+            Confira as novidades do Vale do Paraíba!
           </p>
           <div className="flex items-center mt-4">
             <input
               type="text"
               className="bg-white rounded-l border border-gray-300 h-9 px-3 outline-none flex-grow"
-              placeholder="Your email"
+              placeholder="Digite seu e-mail..."
             />
             <button className="flex items-center justify-center bg-black h-9 w-9 aspect-square rounded-r">
               <svg

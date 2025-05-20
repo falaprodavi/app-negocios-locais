@@ -13,6 +13,9 @@ import {
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import useScrollToTop from "../hooks/useScrollToTop";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -139,12 +142,42 @@ const BusinessDetails = () => {
         {/* Coluna da Direita */}
         <div className="space-y-6">
           {/* Mapa */}
-          <div className="bg-gray-100 rounded-lg p-4 h-64">
+          <div className="bg-gray-100 rounded-lg p-4 h-80">
             <h3 className="font-semibold mb-2">Localização</h3>
-            {/* Integração com Google Maps ou similar */}
-            <div className="h-48 bg-gray-200 rounded flex items-center justify-center">
-              Mapa será exibido aqui
-            </div>
+            {business.lat && business.long ? (
+              <div className="h-64 bg-gray-200 rounded">
+                <MapContainer
+                  center={[parseFloat(business.lat), parseFloat(business.long)]}
+                  zoom={15}
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    borderRadius: "0.5rem",
+                  }}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker
+                    position={[
+                      parseFloat(business.lat),
+                      parseFloat(business.long),
+                    ]}
+                  >
+                    <Popup>{business.name}</Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            ) : (
+              <div className="h-64 bg-gray-200 rounded flex flex-col items-center justify-center text-center p-4">
+                <p className="text-gray-500 mb-2">Localização não disponível</p>
+                <p className="text-sm text-gray-400">
+                  Este estabelecimento ainda não tem coordenadas geográficas
+                  cadastradas
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Redes Sociais */}

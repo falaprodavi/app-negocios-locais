@@ -297,8 +297,8 @@ const BusinessesManager = () => {
           city: businessData.address?.city?._id || "",
           neighborhood: businessData.address?.neighborhood?._id || "",
         },
-        lat: businessData.lat?._id || "",
-        long: businessData.long?._id || "",
+        lat: businessData.lat || "",
+        long: businessData.long || "",
         category: businessData.category?._id || "",
         subCategory: businessData.subCategory?._id || "",
         instagram: businessData.instagram || "",
@@ -378,7 +378,7 @@ const BusinessesManager = () => {
             : "Adicionar Novo Estabelecimento"}
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nome*
@@ -530,7 +530,7 @@ const BusinessesManager = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Rua*
@@ -558,10 +558,6 @@ const BusinessesManager = () => {
                 required
               />
             </div>
-          </div>
-
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Lat
@@ -572,7 +568,6 @@ const BusinessesManager = () => {
                 value={formData.lat}
                 onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
-            
               />
             </div>
 
@@ -586,7 +581,6 @@ const BusinessesManager = () => {
                 value={formData.long}
                 onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
-              
               />
             </div>
           </div>
@@ -631,7 +625,7 @@ const BusinessesManager = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Instagram
@@ -657,9 +651,6 @@ const BusinessesManager = () => {
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 LinkedIn
@@ -672,7 +663,9 @@ const BusinessesManager = () => {
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Twitter
@@ -685,9 +678,6 @@ const BusinessesManager = () => {
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 TikTok

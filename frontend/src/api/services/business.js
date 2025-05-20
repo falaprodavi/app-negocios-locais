@@ -1,6 +1,15 @@
 import api from "../axios";
 
 const BusinessService = {
+  getByOwner: async (ownerId) => {
+    try {
+      const response = await api.get(`/businesses/owner/${ownerId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getLatest: async (limit = 6) => {
     try {
       const response = await api.get(`/businesses/latest?limit=${limit}`);
