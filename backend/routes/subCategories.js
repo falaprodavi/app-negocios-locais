@@ -9,6 +9,7 @@ router.get("/", subCategories.getSubCategories);
 router.get("/id/:id", subCategories.getSubCategoryById);
 router.get("/slug/:slug", subCategories.getSubCategoryBySlug);
 router.get("/category/:categorySlug", subCategories.getSubCategoriesByCategory);
+router.get('/by-category-id/:categoryId', subCategories.getSubCategoriesByCategoryId);
 
 // Rotas protegidas (admin)
 router.post(

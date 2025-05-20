@@ -101,19 +101,39 @@ exports.updateCity = async (req, res) => {
   }
 };
 
-exports.deleteCity = async (req, res) => {
+// controllers/cities.js
+exports.deleteCity = async (req, res, next) => {
   try {
-    const city = await City.findById(req.params.id);
-    if (!city) return res.status(404).json({ error: "Cidade não encontrada." });
+    const city = await City.findByIdAndDelete(req.params.id);
 
-    if (city.image) {
-      fs.unlinkSync(path.resolve(city.image));
+    if (!city) {
+      return res.status(404).json({
+        success: false,
+        message: "Cidade não encontrada",
+      });
     }
 
-    await city.deleteOne();
-    res.json({ message: "Cidade deletada com sucesso." });
+    // Opcional: Remover a imagem associada
+    if (city.image) {
+      const fs = require("fs");
+      const path = require("path");
+      const imagePath = path.join(__dirname, "..", "public", city.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {},
+    });
   } catch (err) {
-    res.status(500).json({ error: "Erro ao deletar cidade." });
+    console.error("Erro ao excluir cidade:", err);
+    res.status(500).json({
+      success: false,
+      message: "Não foi possível excluir a cidade",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
   }
 };
 

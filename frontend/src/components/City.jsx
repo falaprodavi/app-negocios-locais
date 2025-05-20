@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
 import useApi from "../hooks/useApi";
 import CityService from "../api/services/city";
+import { slugify } from "../utils/helpers"; // Adicione esta importação
 
 const City = () => {
   const { data, loading, error } = useApi(CityService.getPopularCities);
@@ -26,7 +26,7 @@ const City = () => {
       {data.map((city) => (
         <Link
           key={city._id}
-          to={`/cities/${city._id}/${city.name}`}
+          to={`/explore?city=${slugify(city.name)}`}
           className="w-full min-w-[250px] max-w-[320px] relative block group"
         >
           <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group-hover:shadow-lg h-full flex flex-col">

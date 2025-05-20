@@ -7,18 +7,19 @@ const bcrypt = require("bcryptjs");
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, phone, password } = req.body;
 
     // Criar usuário
     const user = await User.create({
       name,
       email,
+      phone,
       password,
     });
 
     // Criar token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
+      expiresIn: "1d",
     });
 
     res.status(201).json({
@@ -137,19 +138,34 @@ exports.deleteUser = async (req, res, next) => {
   }
 };
 
-
 // @desc    Listar todos os usuários (apenas admin)
 // @route   GET /api/auth/users
 // @access  Private/Admin
 exports.getUsers = async (req, res, next) => {
   try {
     // Exclui a senha dos resultados
-    const users = await User.find().select('-password');
-    
+    const users = await User.find().select("-password");
+
     res.status(200).json({
       success: true,
       count: users.length,
-      data: users
+      data: users,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get current logged in user
+// @route   GET /api/auth/me
+// @access  Private
+exports.getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.status(200).json({
+      success: true,
+      data: user,
     });
   } catch (err) {
     next(err);

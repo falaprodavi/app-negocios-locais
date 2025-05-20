@@ -36,4 +36,5 @@ router.put(
 // Deletar categoria (protegido)
 router.delete("/:id", protect, authorize("admin"), cities.deleteCity);
 
+
 module.exports = router;

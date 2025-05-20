@@ -63,13 +63,15 @@ const Navbar = () => {
             <div className={underlineClasses(isScrolled)} />
           </Link>
         ))}
-        <button
-          className={`border px-4 py-1 text-sm font-light rounded-full ${
-            isScrolled ? "text-black" : "text-white"
-          }`}
-        >
-          Cadastre
-        </button>
+        <Link to="/dashboard">
+          <button
+            className={`border px-4 py-1 text-sm font-light rounded-full ${
+              isScrolled ? "text-black" : "text-white"
+            }`}
+          >
+            Dashboard
+          </button>
+        </Link>
       </div>
 
       {/* Desktop Right Section */}

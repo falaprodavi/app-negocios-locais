@@ -51,30 +51,49 @@ exports.getNeighborhoodsByCity = async (req, res) => {
 
 exports.createNeighborhood = async (req, res) => {
   try {
+    console.log("Dados recebidos:", req.body); // Adicione para debug
+
     const { name, city } = req.body;
 
     if (!name || !city) {
-      return res
-        .status(400)
-        .json({ error: "Os campos 'name' e 'city' são obrigatórios." });
+      console.log("Campos faltando:", { name, city }); // Debug
+      return res.status(400).json({
+        error: "Os campos 'name' e 'city' são obrigatórios.",
+        received: req.body,
+      });
     }
 
     // Verifica se a cidade existe
     const cityExists = await City.findById(city);
     if (!cityExists) {
-      return res.status(404).json({ error: "Cidade não encontrada." });
+      return res.status(404).json({
+        error: "Cidade não encontrada.",
+        cityId: city,
+      });
     }
 
     const slug = slugify(name, { lower: true, strict: true });
 
+    // Verificação de duplicata
+    const existing = await Neighborhood.findOne({ slug, city });
+    if (existing) {
+      return res.status(400).json({
+        error: "Já existe um bairro com este nome na cidade selecionada",
+        existingNeighborhood: existing,
+      });
+    }
+
     const neighborhood = new Neighborhood({ name, slug, city });
     await neighborhood.save();
+
+    console.log("Bairro criado:", neighborhood); // Debug
     res.status(201).json(neighborhood);
   } catch (err) {
-    console.error(err);
+    console.error("Erro detalhado:", err); // Log mais detalhado
     res.status(400).json({
-      error: "Erro ao criar bairro.",
+      error: "Erro ao criar bairro",
       detail: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 };
@@ -95,6 +114,26 @@ exports.updateNeighborhood = async (req, res) => {
         return res.status(404).json({ error: "Cidade não encontrada." });
       }
       updateData.city = city;
+    }
+
+    // Verifica conflito apenas se name ou city foram alterados
+    if (updateData.slug || updateData.city) {
+      const slug =
+        updateData.slug || (await Neighborhood.findById(req.params.id)).slug;
+      const cityId =
+        updateData.city || (await Neighborhood.findById(req.params.id)).city;
+
+      const existingNeighborhood = await Neighborhood.findOne({
+        _id: { $ne: req.params.id }, // Exclui o próprio registro da verificação
+        slug,
+        city: cityId,
+      });
+
+      if (existingNeighborhood) {
+        return res.status(400).json({
+          error: "Já existe um bairro com este nome na cidade selecionada.",
+        });
+      }
     }
 
     const updatedNeighborhood = await Neighborhood.findByIdAndUpdate(

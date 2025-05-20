@@ -1,7 +1,43 @@
 import React from "react";
 import { FaWhatsapp, FaInstagram, FaHeart, FaShareAlt } from "react-icons/fa";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { Link } from "react-router-dom";
 
-const Card = ({ business }) => {
+const Card = ({ business, loading = false }) => {
+  if (loading) {
+    return (
+      <div className="bg-white rounded shadow">
+        <header className="p-4">
+          <h3 className="text-lg font-bold">
+            <Skeleton width={180} />
+          </h3>
+          <p className="text-xs text-gray-400 uppercase">
+            <Skeleton width={120} />
+          </p>
+        </header>
+
+        <section>
+          <Skeleton height={192} className="w-full" />
+          <p className="text-sm text-gray-600 p-4">
+            <Skeleton count={2} />
+          </p>
+        </section>
+
+        <footer className="p-4 flex justify-between items-center">
+          <Skeleton width={80} height={20} />
+
+          <div className="flex space-x-3">
+            <Skeleton circle width={24} height={24} />
+            <Skeleton circle width={24} height={24} />
+            <Skeleton circle width={24} height={24} />
+            <Skeleton circle width={24} height={24} />
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded shadow">
       <header className="p-4">
@@ -17,7 +53,7 @@ const Card = ({ business }) => {
           <img
             alt={business.name}
             src={business.photos[0]}
-            className="w-full h-48 object-cover"
+            className="w-full h-64 object-cover"
           />
         )}
         <p className="text-sm text-gray-600 p-4">
@@ -26,6 +62,9 @@ const Card = ({ business }) => {
       </section>
 
       <footer className="p-4 flex justify-between items-center">
+        <Link to={`/business/${business.slug}`}>
+          {/* Conteúdo do card */}oi
+        </Link>
         <a
           href={`/business/${business._id}`}
           className="uppercase font-bold text-sm text-blue-700 hover:underline"
@@ -34,7 +73,6 @@ const Card = ({ business }) => {
         </a>
 
         <div className="flex space-x-3">
-          {/* WhatsApp - só mostra se tiver telefone */}
           {business.phone && (
             <a
               href={`https://wa.me/${business.phone}`}
@@ -46,7 +84,6 @@ const Card = ({ business }) => {
             </a>
           )}
 
-          {/* Instagram - só mostra se tiver perfil */}
           {business.social?.instagram && (
             <a
               href={`https://instagram.com/${business.social.instagram}`}
@@ -58,12 +95,10 @@ const Card = ({ business }) => {
             </a>
           )}
 
-          {/* Ícone de favorito */}
           <button aria-label="Favoritar">
             <FaHeart className="text-red-500 text-2xl" />
           </button>
 
-          {/* Ícone de compartilhar */}
           <button aria-label="Compartilhar">
             <FaShareAlt className="text-gray-600 text-2xl" />
           </button>

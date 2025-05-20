@@ -1,30 +1,47 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearch } from "../hooks/useSearch";
 import api from "../api/axios";
 import Card from "../components/Card";
 import useScrollToTop from "../hooks/useScrollToTop";
+import VerticalSearchForm from "../components/VerticalSearchForm";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Explore = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState(() => {
-    const page = parseInt(searchParams.get("page")) || 1;
-    const perPage = parseInt(searchParams.get("perPage")) || 9;
-    return { page, perPage, total: 0 };
+  const [pagination, setPagination] = useState({
+    page: parseInt(searchParams.get("page")) || 1,
+    perPage: parseInt(searchParams.get("perPage")) || 9,
+    total: 0,
   });
+
+  const {
+    searchParams: searchFilters,
+    cities,
+    neighborhoods,
+    categories,
+    subCategories,
+    isLoading: isLoadingFilters,
+    handleSearchChange,
+  } = useSearch();
 
   useScrollToTop([pagination.page, searchParams]);
 
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const queryParams = new URLSearchParams(searchParams.toString()); // Mantém todos os parâmetros existentes
+      const queryParams = new URLSearchParams(searchParams.toString());
 
-      // Garante que os parâmetros de paginação estão atualizados
-      queryParams.set("page", pagination.page);
+      // Sempre força a página 1 quando os parâmetros de busca mudam
+      if (searchParams.toString() !== queryParams.toString()) {
+        queryParams.set("page", "1");
+      }
+
       queryParams.set("perPage", pagination.perPage);
 
       const res = await api.get(`/businesses/search?${queryParams.toString()}`);
@@ -32,12 +49,15 @@ const Explore = () => {
       setResults(res.data.data);
       setPagination((prev) => ({
         ...prev,
+        page: parseInt(queryParams.get("page")) || 1,
         total: res.data.pagination.total,
-        totalPages: res.data.pagination.totalPages, // Opcional
+        totalPages: res.data.pagination.totalPages,
       }));
     } catch (err) {
-      console.error("Erro ao buscar:", err);
-      setError("Ocorreu um erro ao carregar os resultados");
+      setError(
+        err.response?.data?.message ||
+          "Ocorreu um erro ao carregar os resultados"
+      );
       setResults([]);
     } finally {
       setLoading(false);
@@ -46,7 +66,7 @@ const Explore = () => {
 
   useEffect(() => {
     fetchResults();
-  }, [pagination.page, pagination.perPage]);
+  }, [searchParams.toString(), pagination.perPage]);
 
   const handlePageChange = (newPage) => {
     const newPagination = { ...pagination, page: newPage };
@@ -65,7 +85,7 @@ const Explore = () => {
     const newPagination = {
       ...pagination,
       perPage: newPerPage,
-      page: 1,
+      page: 1, // Reset para a página 1 ao mudar itens por página
     };
     setPagination(newPagination);
 
@@ -84,63 +104,88 @@ const Explore = () => {
       if (value) newSearchParams.set(key, value);
     });
 
-    // Mantém a paginação
+    // Reseta a paginação para a primeira página
     newSearchParams.set("page", "1");
     newSearchParams.set("perPage", pagination.perPage.toString());
 
-    // Atualiza a URL e reseta a paginação
+    // Atualiza a URL
     navigate(`?${newSearchParams.toString()}`);
-    setPagination((prev) => ({ ...prev, page: 1 }));
+
+    // Atualiza o estado local da paginação
+    setPagination((prev) => ({
+      ...prev,
+      page: 1,
+    }));
   };
 
   const totalPages = Math.ceil(pagination.total / pagination.perPage);
 
-  if (loading) return <div className="p-4 mt-24">Carregando...</div>;
   if (error) return <div className="p-4 mt-24 text-red-500">{error}</div>;
 
-  console.log("Pagination state:", pagination);
-  console.log("URL params:", searchParams.toString());
-  console.log("Total pages:", totalPages);
-
   return (
-    <div className="mt-24 p-4 flex flex-col lg:flex-row gap-8">
+    <div className="w-full px-4 md:px-16 lg:px-24 xl:px-32 mt-24 p-4 flex flex-col lg:flex-row gap-8 ">
       {/* Sidebar com SearchForm */}
-      <aside className="w-full lg:w-64 space-y-6"></aside>
+      <aside className="w-full lg:w-80">
+        <VerticalSearchForm />
+      </aside>
 
       {/* Conteúdo principal */}
       <main className="flex-1">
         <h1 className="text-2xl font-semibold mb-6">
-          Resultados <span className="text-gray-500">({pagination.total})</span>
+          {loading ? (
+            <Skeleton width={250} height={32} />
+          ) : (
+            <>
+              Resultados{" "}
+              <span className="text-gray-500">({pagination.total})</span>
+            </>
+          )}
         </h1>
 
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           {/* Seletor de itens por página */}
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <label htmlFor="perPage" className="whitespace-nowrap">
-              Exibir:
-            </label>
-            <select
-              id="perPage"
-              value={pagination.perPage}
-              onChange={(e) => handlePerPageChange(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-1 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="9">9 por página</option>
-              <option value="12">12 por página</option>
-              <option value="24">24 por página</option>
-            </select>
-          </div>
+          {loading ? (
+            <Skeleton width={150} height={32} />
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <label htmlFor="perPage" className="whitespace-nowrap">
+                Exibir:
+              </label>
+              <select
+                id="perPage"
+                value={pagination.perPage}
+                onChange={(e) => handlePerPageChange(e.target.value)}
+                className="border border-gray-300 rounded px-3 py-1 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="9">9 por página</option>
+                <option value="12">12 por página</option>
+                <option value="24">24 por página</option>
+              </select>
+            </div>
+          )}
 
           {/* Info da página atual */}
-          <div className="text-sm text-gray-500">
-            Página{" "}
-            <span className="font-medium text-gray-800">{pagination.page}</span>{" "}
-            de <span className="font-medium text-gray-800">{totalPages}</span>
-          </div>
+          {loading ? (
+            <Skeleton width={120} height={24} />
+          ) : (
+            <div className="text-sm text-gray-500">
+              Página{" "}
+              <span className="font-medium text-gray-800">
+                {pagination.page}
+              </span>{" "}
+              de <span className="font-medium text-gray-800">{totalPages}</span>
+            </div>
+          )}
         </div>
 
         {/* Resultados */}
-        {results.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {Array.from({ length: pagination.perPage }).map((_, index) => (
+              <Card key={`skeleton-${index}`} loading={true} />
+            ))}
+          </div>
+        ) : results.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
               Nenhum estabelecimento encontrado com os filtros atuais

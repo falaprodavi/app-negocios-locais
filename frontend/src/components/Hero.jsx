@@ -1,13 +1,26 @@
 import React from "react";
-import SearchForm from "./SearchForm";
+import { useSearch } from "../hooks/useSearch";
+import HorizontalSearchForm from "../components/HorizontalSearchForm";
 
 const Hero = () => {
-  const cities = [
+  const city = [
     "São José dos Campos",
     "Taubaté",
     "Jacareí",
+    "Pinda",
     // ... outras cidades
   ];
+
+  const {
+    searchParams,
+    cities,
+    neighborhoods,
+    categories,
+    subCategories,
+    isLoading,
+    handleSearchChange,
+    handleSearchSubmit,
+  } = useSearch();
 
   return (
     <div className="relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center min-h-[85vh]">
@@ -23,11 +36,20 @@ const Hero = () => {
         </h1>
 
         <p className="text-sm md:text-base mb-8 max-w-2xl mx-auto">
-          {cities.join(", ")} e muito mais
+          {city.join(", ")} e muito mais
         </p>
 
         <div className="w-full flex justify-center">
-          <SearchForm />
+          <HorizontalSearchForm
+            searchParams={searchParams}
+            cities={cities}
+            neighborhoods={neighborhoods}
+            categories={categories}
+            subCategories={subCategories}
+            onSearchChange={handleSearchChange}
+            onSearchSubmit={handleSearchSubmit}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

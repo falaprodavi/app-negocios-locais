@@ -185,55 +185,6 @@ exports.deleteBusiness = async (req, res) => {
   }
 };
 
-/* exports.searchBusinesses = async (req, res) => {
-  try {
-    const { name, city, neighborhood, category, subcategory } = req.query;
-    const filter = {};
-
-    if (name) filter.name = { $regex: name, $options: "i" };
-
-    if (city) {
-      const cityDoc = await City.findOne({ slug: city });
-      if (cityDoc) filter["address.city"] = cityDoc._id;
-    }
-
-    if (neighborhood) {
-      const neighborhoodDoc = await Neighborhood.findOne({
-        slug: neighborhood,
-      });
-      if (neighborhoodDoc) filter["address.neighborhood"] = neighborhoodDoc._id;
-    }
-
-    if (category) {
-      const categoryDoc = await Category.findOne({ slug: category });
-      if (categoryDoc) filter.category = categoryDoc._id;
-    }
-
-    if (subcategory) {
-      const subCategoryDoc = await SubCategory.findOne({ slug: subcategory });
-      if (subCategoryDoc) filter.subCategory = subCategoryDoc._id;
-    }
-
-    const businesses = await Business.find(filter)
-      .populate("category subCategory address.city address.neighborhood owner")
-      .lean();
-
-    // Formatar os dados para o frontend
-    const formattedBusinesses = businesses.map((business) => ({
-      ...business,
-      citySlug: business.address.city?.slug,
-      neighborhoodSlug: business.address.neighborhood?.slug,
-      categorySlug: business.category?.slug,
-      subCategorySlug: business.subCategory?.slug,
-    }));
-
-    res.json({ success: true, data: formattedBusinesses });
-  } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ success: false, message: "Erro na busca" });
-  }
-}; */
-
 exports.searchBusinesses = async (req, res) => {
   try {
     const {

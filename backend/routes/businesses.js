@@ -8,6 +8,7 @@ const {
   deleteBusiness,
   getLatestBusinesses,
   searchBusinesses,
+  getBusinessBySlug,
 } = require("../controllers/businessController");
 
 const { protect, authorize } = require("../middleware/auth");
@@ -17,6 +18,7 @@ const {
 } = require("../utils/fileUpload");
 
 router.get("/latest", getLatestBusinesses);
+router.get("/slug/:slug", getBusinessBySlug);
 
 // GET /api/businesses/search
 router.get("/search", searchBusinesses);

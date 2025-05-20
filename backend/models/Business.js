@@ -18,8 +18,8 @@ const BusinessSchema = new mongoose.Schema({
     required: [true, "O telefone é obrigatório"],
   },
   whatsapp: String,
-  photos: [String], // URLs das imagens (armazenadas no Cloudinary/S3)
-  video: String, // Embed do YouTube (ex: "https://youtu.be/...")
+  photos: [String], 
+  video: String, 
   instagram: String,
   facebook: String,
   linkedin: String,

@@ -20,9 +20,11 @@ const BusinessService = {
     }
   },
 
-  getAll: async () => {
+  getAll: async (page = 1, perPage = 10) => {
     try {
-      const response = await api.get("/businesses");
+      const response = await api.get(
+        `/businesses?page=${page}&perPage=${perPage}`
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -38,18 +40,51 @@ const BusinessService = {
     }
   },
 
-  create: async (businessData) => {
+  getBySlug: async (slug) => {
     try {
-      const response = await api.post("/businesses", businessData);
+      const response = await api.get(`/businesses/slug/${slug}`);
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  update: async (id, businessData) => {
+  search: async (filters = {}, page = 1, perPage = 9) => {
     try {
-      const response = await api.put(`/businesses/${id}`, businessData);
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+      params.append("page", page);
+      params.append("perPage", perPage);
+
+      const response = await api.get(`/businesses/search?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  create: async (formData) => {
+    try {
+      const response = await api.post("/businesses", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  update: async (id, formData) => {
+    try {
+      const response = await api.put(`/businesses/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -61,7 +96,12 @@ const BusinessService = {
       const response = await api.delete(`/businesses/${id}`);
       return response.data;
     } catch (error) {
-      throw error;
+      const enhancedError = new Error(
+        error.response?.data?.message || "Falha ao excluir estabelecimento"
+      );
+      enhancedError.status = error.response?.status;
+      enhancedError.details = error.response?.data;
+      throw enhancedError;
     }
   },
 };
