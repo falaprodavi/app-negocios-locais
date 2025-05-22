@@ -155,7 +155,7 @@ const LoginPage = () => {
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm">
+          {/*          <div className="mt-6 text-center text-sm">
             <p className="text-gray-600">
               Não tem uma conta?{" "}
               <Link
@@ -165,7 +165,7 @@ const LoginPage = () => {
                 Cadastre-se
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

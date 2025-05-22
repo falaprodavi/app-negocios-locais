@@ -12,7 +12,7 @@ const CTA = () => {
           id veniam aliqua proident excepteur commodo do ea.
         </p>
         <div className="flex items-center gap-4 mt-6">
-          <button className="bg-indigo-500 hover:bg-indigo-600 px-8 py-3 text-white font-medium rounded-lg shadow-md active:scale-95 transition-all">
+          <button className="bg-[#042f4a] hover:bg-indigo-600 px-8 py-3 text-white font-medium rounded-lg shadow-md active:scale-95 transition-all">
             Get Started
           </button>
           <button className="group flex items-center gap-2 px-8 py-3 font-medium border border-gray-400 rounded-lg hover:bg-gray-100 transition active:scale-95">

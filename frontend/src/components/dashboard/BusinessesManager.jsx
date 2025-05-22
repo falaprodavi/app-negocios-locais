@@ -4,10 +4,23 @@ import CategoryService from "../../api/services/category";
 import SubCategoryService from "../../api/services/subcategory";
 import CityService from "../../api/services/city";
 import NeighborhoodService from "../../api/services/neighborhood";
-import { slugify } from "../../utils/helpers";
 import useScrollToTop from "../../hooks/useScrollToTop";
+import { formatPhoneNumber } from "../../utils/formatPhone";
+
 
 const BusinessesManager = () => {
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+
+    // Aplica a formatação
+    const formattedValue = formatPhoneNumber(value);
+
+    setFormData({
+      ...formData,
+      [name]: formattedValue,
+    });
+  };
+
   useScrollToTop();
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -414,11 +427,13 @@ const BusinessesManager = () => {
                 Telefone*
               </label>
               <input
-                type="text"
+                type="tel" // Alterado para type="tel" para melhor experiência em mobile
                 name="phone"
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={handlePhoneChange} // Usando o novo handler
                 className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="(99) 99999-9999"
+                maxLength={15} // Com formatação, o máximo será 15 caracteres
                 required
               />
             </div>
@@ -428,11 +443,13 @@ const BusinessesManager = () => {
                 WhatsApp
               </label>
               <input
-                type="text"
+                type="tel"
                 name="whatsapp"
                 value={formData.whatsapp}
-                onChange={handleInputChange}
+                onChange={handlePhoneChange} // Usando o mesmo handler
                 className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="(99) 99999-9999"
+                maxLength={15}
               />
             </div>
           </div>

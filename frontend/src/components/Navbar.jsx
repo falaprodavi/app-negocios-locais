@@ -45,7 +45,7 @@ const Navbar = () => {
     >
       <Link to="/">
         <img
-          src={assets.logo}
+          src={assets.logoguia}
           alt="logo"
           className={`h-9 ${isScrolled && "invert opacity-80"}`}
         />
@@ -63,7 +63,7 @@ const Navbar = () => {
             <div className={underlineClasses(isScrolled)} />
           </Link>
         ))}
-        <Link to="/dashboard">
+        {/*         <Link to="/dashboard">
           <button
             className={`border px-4 py-1 text-sm font-light rounded-full ${
               isScrolled ? "text-black" : "text-white"
@@ -71,18 +71,13 @@ const Navbar = () => {
           >
             Dashboard
           </button>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Desktop Right Section */}
       <div className="hidden md:flex items-center gap-4">
-        <img
-          src={assets.searchIcon}
-          alt="search"
-          className={`${isScrolled && "invert"} h-7 transition-all`}
-        />
-        <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4">
-          Login
+        <button className="bg-[#042f4a] text-white px-4 py-2.5 rounded-full ml-4">
+          Cadastre seu estabelecimento
         </button>
       </div>
 

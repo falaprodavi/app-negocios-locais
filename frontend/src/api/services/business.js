@@ -10,19 +10,36 @@ const BusinessService = {
     }
   },
 
-  getLatest: async (limit = 6) => {
+  getBusinessesByDate: async () => {
     try {
-      const response = await api.get(`/businesses/latest?limit=${limit}`);
-      return response.data;
+      const response = await api.get("/businesses/by-date");
+      return response;
     } catch (error) {
       throw error;
     }
   },
 
-  search: async (params) => {
+  getDashboardStats: async () => {
     try {
-      const query = new URLSearchParams(params).toString();
-      const response = await api.get(`/businesses/search?${query}`);
+      const response = await api.get("/businesses/dashboard/stats");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getRecentBusinesses: async () => {
+    try {
+      const response = await api.get("/businesses/dashboard/recent-businesses");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getLatest: async (limit = 6) => {
+    try {
+      const response = await api.get(`/businesses/latest?limit=${limit}`);
       return response.data;
     } catch (error) {
       throw error;

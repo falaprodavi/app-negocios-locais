@@ -47,18 +47,25 @@ const Card = ({ business, loading = false }) => {
       <header className="p-4">
         <h3 className="text-lg font-bold">{business.name}</h3>
         <p className="text-[10px] text-gray-400 uppercase">
-          <span>{business.category?.name || "Categoria"} - </span>
+          <span className="font-bold text-[#042f4a]">
+            {business.category?.name || "Categoria"} -{" "}
+          </span>
           {business.address?.neighborhood?.name}, {business.address?.city?.name}
         </p>
       </header>
 
       <section>
         {business.photos?.[0] && (
-          <img
-            alt={business.name}
-            src={business.photos[0]}
-            className="w-full h-64 object-cover"
-          />
+          <Link to={`/business/${business.slug}`}>
+            <div className="relative overflow-hidden group">
+              <img
+                alt={business.name}
+                src={business.photos[0]}
+                className="w-full h-64 object-cover group-hover:scale-105 transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </div>
+          </Link>
         )}
         <p className="text-sm text-gray-600 p-4">
           {business.description?.slice(0, 100)}...
@@ -68,7 +75,7 @@ const Card = ({ business, loading = false }) => {
       <footer className="p-4 flex justify-between items-center">
         <Link
           to={`/business/${business.slug}`}
-          className="uppercase font-bold text-sm text-blue-700 hover:underline"
+          className="uppercase font-bold text-sm text-[#042f4a] hover:underline"
         >
           VER MAIS
         </Link>
@@ -78,7 +85,7 @@ const Card = ({ business, loading = false }) => {
             <a
               href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
                 business.whatsapp
-              )}&text=Encontrei+sua+empresa+no+XYZ&type=phone_number&app_absent=0`}
+              )}&text=Encontrei+sua+empresa+no+Guia+Do+Vale&type=phone_number&app_absent=0`}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"

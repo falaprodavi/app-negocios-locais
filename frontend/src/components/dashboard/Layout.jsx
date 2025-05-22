@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import AuthService from "../../api/auth";
+import {
+  MdSpaceDashboard,
+  MdAddBusiness,
+  MdCategory,
+  MdOutlineCategory,
+  MdMap,
+  MdMyLocation,
+} from "react-icons/md";
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -33,42 +41,54 @@ const Layout = () => {
             to="/dashboard"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏠</span>
+            <span>
+              <MdSpaceDashboard />
+            </span>
             {sidebarOpen && <span className="ml-3">Início</span>}
           </Link>
           <Link
             to="/dashboard/business"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏙️</span>
+            <span>
+              <MdAddBusiness />
+            </span>
             {sidebarOpen && <span className="ml-3">Estabelecimentos</span>}
           </Link>
           <Link
             to="/dashboard/cities"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏙️</span>
+            <span>
+              <MdMap />
+            </span>
             {sidebarOpen && <span className="ml-3">Cidades</span>}
           </Link>
           <Link
             to="/dashboard/neighborhoods"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏙️</span>
+            <span>
+              <MdMyLocation />
+            </span>
             {sidebarOpen && <span className="ml-3">Bairros</span>}
           </Link>
           <Link
             to="/dashboard/categories"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏙️</span>
+            <span>
+              <MdCategory />
+            </span>
             {sidebarOpen && <span className="ml-3">Categorias</span>}
           </Link>
           <Link
             to="/dashboard/subcategories"
             className="flex items-center p-3 hover:bg-blue-700 rounded-md"
           >
-            <span>🏙️</span>
+            <span>
+              <MdOutlineCategory />
+            </span>
             {sidebarOpen && <span className="ml-3">Sub Categorias</span>}
           </Link>
         </nav>

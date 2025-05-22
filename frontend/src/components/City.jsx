@@ -9,11 +9,11 @@ const City = () => {
 
   if (loading)
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+      <div className="">
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="w-full min-w-[250px] max-w-[320px] bg-gray-200 rounded-lg h-64 animate-pulse"
+            className="w-full min-w-[250px] bg-gray-200 rounded-lg h-64 animate-pulse"
           ></div>
         ))}
       </div>
@@ -27,7 +27,7 @@ const City = () => {
         <Link
           key={city._id}
           to={`/explore?city=${slugify(city.name)}`}
-          className="w-full min-w-[250px] max-w-[320px] relative block group"
+          className="w-full min-w-[250px] relative block group"
         >
           <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group-hover:shadow-lg h-full flex flex-col">
             <div className="relative flex-grow">

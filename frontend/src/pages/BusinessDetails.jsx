@@ -142,18 +142,20 @@ const BusinessDetails = () => {
         {/* Coluna da Direita */}
         <div className="space-y-6">
           {/* Mapa */}
-          <div className="bg-gray-100 rounded-lg p-4 h-80">
+          <div className="bg-gray-100 rounded-lg p-4 h-80 z-0">
             <h3 className="font-semibold mb-2">Localização</h3>
             {business.lat && business.long ? (
-              <div className="h-64 bg-gray-200 rounded">
+              <div className="h-64 bg-gray-200 rounded z-0">
                 <MapContainer
                   center={[parseFloat(business.lat), parseFloat(business.long)]}
                   zoom={15}
                   style={{
                     height: "100%",
                     width: "100%",
+                    zIndex: "1",
                     borderRadius: "0.5rem",
                   }}
+                  className="z-0"
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

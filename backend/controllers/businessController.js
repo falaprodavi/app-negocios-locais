@@ -4,6 +4,48 @@ const Category = require("../models/Category");
 const SubCategory = require("../models/SubCategory");
 const Business = require("../models/Business");
 
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const totalBusinesses = await Business.countDocuments();
+    const totalCities = await City.countDocuments();
+    const totalCategories = await Category.countDocuments();
+
+    res.json({
+      success: true,
+      data: {
+        totalBusinesses,
+        totalCities,
+        totalCategories,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+exports.getRecentBusinesses = async (req, res) => {
+  console.log("✅ Rota acessada em:", new Date()); // ← Deve aparecer no terminal
+
+  try {
+    const businesses = await Business.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .populate("address.city", "name")
+      .populate("category", "name")
+      .select("name photos createdAt slug");
+
+    console.log("Negócios encontrados:", businesses.length); // ← Confirma a query
+
+    res.json({
+      success: true,
+      data: businesses, // ← Formato padronizado
+    });
+  } catch (err) {
+    console.error("❌ Erro no controller:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // Criar um novo estabelecimento
 exports.createBusiness = async (req, res) => {
   try {
@@ -33,59 +75,6 @@ exports.getBusinesses = async (req, res) => {
     res.json({ success: true, data: businesses });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const searchBusinesses = async (req, res) => {
-  try {
-    const {
-      name,
-      citySlug,
-      neighborhoodSlug,
-      categorySlug,
-      subCategorySlug,
-    } = req.query;
-
-    const filter = {};
-
-    if (citySlug) {
-      const city = await City.findOne({ slug: citySlug });
-      if (city) filter["address.city"] = city._id;
-    }
-
-    if (neighborhoodSlug) {
-      const neighborhood = await Neighborhood.findOne({
-        slug: neighborhoodSlug,
-      });
-      if (neighborhood) filter["address.neighborhood"] = neighborhood._id;
-    }
-
-    if (categorySlug) {
-      const category = await Category.findOne({ slug: categorySlug });
-      if (category) filter.category = category._id;
-    }
-
-    if (subCategorySlug) {
-      const subCategory = await SubCategory.findOne({ slug: subCategorySlug });
-      if (subCategory) filter.subCategory = subCategory._id;
-    }
-
-    if (name) {
-      filter.name = { $regex: name, $options: "i" }; // busca parcial e case-insensitive
-    }
-
-    const businesses = await Business.find(filter)
-      .populate("category")
-      .populate("subCategory")
-      .populate("address.city")
-      .populate("address.neighborhood");
-
-    res.json({ success: true, data: businesses });
-  } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ success: false, message: "Erro ao buscar estabelecimentos" });
   }
 };
 
@@ -189,31 +178,53 @@ exports.searchBusinesses = async (req, res) => {
   try {
     const {
       name,
-      city,
-      neighborhood,
+      city, // Mantemos o nome original do parâmetro
+      neighborhood, // Mantemos o nome original do parâmetro
       category,
       subcategory,
-      page = 1, // Adicionado
-      perPage = 9, // Adicionado
+      page = 1,
+      perPage = 9,
     } = req.query;
 
     const filter = {};
 
-    // Filtros existentes (mantidos iguais)
+    // Filtro por nome (mantido igual)
     if (name) filter.name = { $regex: name, $options: "i" };
 
+    // 1. Primeiro encontra a cidade (se especificada)
+    let cityId;
     if (city) {
+      // Agora usando 'city' em vez de 'citySlug'
       const cityDoc = await City.findOne({ slug: city });
-      if (cityDoc) filter["address.city"] = cityDoc._id;
+      if (!cityDoc) {
+        return res.json({
+          success: true,
+          data: [],
+          message: "Cidade não encontrada",
+        });
+      }
+      cityId = cityDoc._id;
+      filter["address.city"] = cityId;
     }
 
+    // 2. Filtro de bairro (agora vinculado à cidade)
     if (neighborhood) {
-      const neighborhoodDoc = await Neighborhood.findOne({
-        slug: neighborhood,
-      });
-      if (neighborhoodDoc) filter["address.neighborhood"] = neighborhoodDoc._id;
+      // Agora usando 'neighborhood' em vez de 'neighborhoodSlug'
+      const neighborhoodFilter = { slug: neighborhood };
+      if (cityId) neighborhoodFilter.city = cityId; // Filtro combinado
+
+      const neighborhoodDoc = await Neighborhood.findOne(neighborhoodFilter);
+      if (!neighborhoodDoc) {
+        return res.json({
+          success: true,
+          data: [],
+          message: "Bairro não encontrado nesta cidade",
+        });
+      }
+      filter["address.neighborhood"] = neighborhoodDoc._id;
     }
 
+    // Restante dos filtros (mantidos iguais)
     if (category) {
       const categoryDoc = await Category.findOne({ slug: category });
       if (categoryDoc) filter.category = categoryDoc._id;
@@ -224,12 +235,11 @@ exports.searchBusinesses = async (req, res) => {
       if (subCategoryDoc) filter.subCategory = subCategoryDoc._id;
     }
 
-    // Cálculos de paginação
+    // Paginação (mantida igual)
     const currentPage = parseInt(page);
     const itemsPerPage = parseInt(perPage);
     const skip = (currentPage - 1) * itemsPerPage;
 
-    // Busca paginada (usando Promise.all para performance)
     const [businesses, totalCount] = await Promise.all([
       Business.find(filter)
         .skip(skip)
@@ -238,11 +248,10 @@ exports.searchBusinesses = async (req, res) => {
           "category subCategory address.city address.neighborhood owner"
         )
         .lean(),
-
-      Business.countDocuments(filter), // Conta o total de documentos
+      Business.countDocuments(filter),
     ]);
 
-    // Formatação dos resultados
+    // Formatação dos resultados (mantida igual)
     const formattedBusinesses = businesses.map((business) => ({
       ...business,
       citySlug: business.address.city?.slug,
@@ -251,7 +260,6 @@ exports.searchBusinesses = async (req, res) => {
       subCategorySlug: business.subCategory?.slug,
     }));
 
-    // Resposta com metadados de paginação
     res.json({
       success: true,
       data: formattedBusinesses,
@@ -287,5 +295,20 @@ exports.getBusinessBySlug = async (req, res) => {
     res.json({ success: true, data: business });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getBusinessesByDate = async (req, res) => {
+  try {
+    const businesses = await Business.find({})
+      .select("createdAt")
+      .sort({ createdAt: 1 });
+
+    res.json({
+      success: true,
+      data: businesses,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 };

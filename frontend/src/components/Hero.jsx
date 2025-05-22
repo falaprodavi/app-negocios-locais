@@ -27,7 +27,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-black/50"></div>
 
       <div className="relative z-10 w-full max-w-6xl text-center">
-        <span className="inline-block text-xs md:text-sm bg-blue-500 px-3.5 py-1 rounded-full mb-4">
+        <span className="inline-block text-xs md:text-sm bg-[#042f4a] px-3.5 py-1 rounded-full mb-4">
           Os melhores estabelecimentos do Vale do Paraíba
         </span>
 

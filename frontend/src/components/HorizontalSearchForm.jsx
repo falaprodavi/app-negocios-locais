@@ -107,7 +107,7 @@ const HorizontalSearchForm = ({
 
       <button
         type="submit"
-        className="w-full md:w-auto px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full md:w-auto px-6 py-2 rounded-lg bg-[#042f4a] text-white font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
         disabled={isLoading}
       >
         {isLoading ? "Buscando..." : "Buscar"}

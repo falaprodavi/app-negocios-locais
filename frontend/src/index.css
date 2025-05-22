@@ -35,14 +35,6 @@
     border-radius: 4px;
   }
   
-  button {
-   
-  }
-  
-  button:hover {
-
-  }
-  
   button:disabled {
     background: #cccccc;
     cursor: not-allowed;
@@ -113,3 +105,13 @@
   .swiper-slide-thumb-active {
     border-color: #3b82f6 !important;
   }
+
+  /* Adicione isso no seu arquivo CSS global ou no componente */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1 !important;
+}

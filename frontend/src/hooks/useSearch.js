@@ -1,7 +1,7 @@
 // src/hooks/useSearch.js
 import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { api } from "../api/axios"; // Ajuste o caminho conforme sua estrutura
 
 export const useSearch = () => {
   const [searchParams, setSearchParams] = useState({
@@ -27,8 +27,8 @@ export const useSearch = () => {
       try {
         setIsLoading(true);
         const [citiesRes, categoriesRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/cities"),
-          axios.get("http://localhost:5000/api/categories"),
+          api.get("/cities"),
+          api.get("/categories"),
         ]);
 
         setCities(citiesRes.data);
@@ -69,9 +69,7 @@ export const useSearch = () => {
   // Carrega bairros por slug da cidade
   const loadNeighborhoods = async (citySlug) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/neighborhoods?city=${citySlug}`
-      );
+      const res = await api.get(`/neighborhoods?city=${citySlug}`);
       setNeighborhoods(res.data);
     } catch (error) {
       console.error("Error loading neighborhoods:", error);
@@ -82,9 +80,7 @@ export const useSearch = () => {
   // Carrega subcategorias por slug da categoria
   const loadSubCategories = async (categorySlug) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/subcategories?category=${categorySlug}`
-      );
+      const res = await api.get(`/subcategories?category=${categorySlug}`);
       setSubCategories(res.data);
     } catch (error) {
       console.error("Error loading subcategories:", error);

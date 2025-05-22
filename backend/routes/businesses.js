@@ -9,16 +9,23 @@ const {
   getLatestBusinesses,
   searchBusinesses,
   getBusinessBySlug,
+  getDashboardStats,
+  getRecentBusinesses,
+  getBusinessesByDate,
 } = require("../controllers/businessController");
+
+router.get("/dashboard/stats", getDashboardStats);
+router.get("/dashboard/recent-businesses", getRecentBusinesses);
+router.get("/by-date", getBusinessesByDate);
+
+router.get("/latest", getLatestBusinesses);
+router.get("/slug/:slug", getBusinessBySlug);
 
 const { protect, authorize } = require("../middleware/auth");
 const {
   uploadBusinessCreate,
   uploadBusinessPhotos,
 } = require("../utils/fileUpload");
-
-router.get("/latest", getLatestBusinesses);
-router.get("/slug/:slug", getBusinessBySlug);
 
 // GET /api/businesses/search
 router.get("/search", searchBusinesses);
