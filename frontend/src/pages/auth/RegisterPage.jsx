@@ -1,16 +1,36 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../api/auth";
-import loginImage from "../../assets/login.jpg"; // Substitua pelo seu caminho de imagem
+import loginImage from "../../assets/login.jpg";
+import { formatPhoneNumber } from "../../utils/formatPhone";
 
 const RegisterPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "phone") {
+      const formattedValue = formatPhoneNumber(value);
+      setFormData({
+        ...formData,
+        [name]: formattedValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +38,12 @@ const RegisterPage = () => {
     setError("");
 
     try {
-      await AuthService.register(name, email, phone, password);
+      await AuthService.register(
+        formData.name,
+        formData.email,
+        formData.phone,
+        formData.password
+      );
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Erro ao fazer o registro");
@@ -44,7 +69,6 @@ const RegisterPage = () => {
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               Faça seu Registro
             </h1>
-            <p className="text-gray-600"></p>
           </div>
 
           {error && (
@@ -63,9 +87,10 @@ const RegisterPage = () => {
               </label>
               <input
                 id="name"
-                type="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="Digite seu nome"
                 required
@@ -81,9 +106,10 @@ const RegisterPage = () => {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="seu@email.com"
                 required
@@ -99,11 +125,13 @@ const RegisterPage = () => {
               </label>
               <input
                 id="phone"
-                type="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="(99) 99999-9999"
+                maxLength={15}
                 required
               />
             </div>
@@ -117,9 +145,10 @@ const RegisterPage = () => {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 required
@@ -199,13 +228,6 @@ const RegisterPage = () => {
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Faça o Login
-              </Link>{" "}
-              ou{" "}
-              <Link
-                to="/"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Ir para o Site
               </Link>
             </p>
           </div>

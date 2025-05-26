@@ -1,22 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "../assets/assets";
+import { Link } from "react-router-dom";
+import useApi from "../hooks/useApi";
+import CityService from "../api/services/city";
+import { slugify } from "../utils/helpers";
+import CategoryService from "../api/services/category";
 
 const Footer = () => {
-  const companyLinks = [
-    { label: "About", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Partners", href: "#" },
-  ];
+  const { data: cities } = useApi(CityService.getPopularCities);
+  const [allCategories, setAllCategories] = useState([]);
+  const [randomCategories, setRandomCategories] = useState([]);
 
-  const supportLinks = [
-    { label: "Help Center", href: "#" },
-    { label: "Safety Information", href: "#" },
-    { label: "Cancellation Options", href: "#" },
-    { label: "Contact Us", href: "#" },
-    { label: "Accessibility", href: "#" },
-  ];
+  // Carrega todas as categorias
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await CategoryService.getAll();
+        setAllCategories(response);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Seleciona categorias aleatórias quando allCategories é atualizado
+  useEffect(() => {
+    if (allCategories.length > 0) {
+      selectRandomCategories();
+    }
+  }, [allCategories]);
+
+  // Função para selecionar 5 categorias aleatórias
+  const selectRandomCategories = () => {
+    // Cria uma cópia do array para não modificar o original
+    const shuffled = [...allCategories];
+
+    // Algoritmo Fisher-Yates para embaralhar
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Pega as primeiras 5 categorias do array embaralhado
+    setRandomCategories(shuffled.slice(0, 5));
+  };
+
+  // Rotação automática a cada 30 segundos (opcional)
+  useEffect(() => {
+    if (allCategories.length > 0) {
+      const interval = setInterval(selectRandomCategories, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [allCategories]);
 
   const legalLinks = [
     { label: "Privacy", href: "#" },
@@ -66,8 +103,61 @@ const Footer = () => {
           </div>
         </div>
 
-        <FooterSection title="CIDADES" links={companyLinks} />
-        <FooterSection title="GATEGORIAS" links={supportLinks} />
+        {/* Seção de Cidades */}
+        <div>
+          <h3 className="text-lg text-gray-800">CIDADES</h3>
+          <ul className="mt-3 flex flex-col gap-2 text-sm">
+            {cities?.slice(0, 5).map((city) => (
+              <li key={city._id}>
+                <Link
+                  to={`/explore?city=${slugify(city.name)}`}
+                  className="hover:text-gray-800 transition-colors"
+                >
+                  {city.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Seção de Categorias Aleatórias */}
+        <div>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg text-gray-800 mr-3"> CATEGORIAS </h3>
+            <button
+              onClick={selectRandomCategories}
+              className="text-gray-500 hover:text-gray-800 transition-colors"
+              title="Mostrar outras categorias"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
+          </div>
+          <ul className="mt-3 flex flex-col gap-2 text-sm">
+            {randomCategories.map((category) => (
+              <li key={category._id}>
+                <Link
+                  to={`/explore?category=${slugify(category.name)}`}
+                  className="hover:text-gray-800 transition-colors"
+                >
+                  {category.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className="max-w-80">
           <h3 className="text-lg text-gray-800">FIQUE ATUALIZADO</h3>
@@ -116,18 +206,5 @@ const Footer = () => {
     </div>
   );
 };
-
-const FooterSection = ({ title, links }) => (
-  <div>
-    <h3 className="text-lg text-gray-800">{title}</h3>
-    <ul className="mt-3 flex flex-col gap-2 text-sm">
-      {links.map((link) => (
-        <li key={link.label}>
-          <a href={link.href}>{link.label}</a>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
 
 export default Footer;

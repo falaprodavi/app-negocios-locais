@@ -67,13 +67,13 @@ const Card = ({ business, loading = false }) => {
       <div className="p-4 flex justify-between items-center border-t">
         <Link
           to={`/business/${business.slug}`}
-          className="uppercase font-semibold text-xs text-[#042f4a] hover:underline"
+          className="uppercase font-semibold text-xs text-[#042f4a] "
         >
           Ver mais
         </Link>
 
         <div className="flex items-center space-x-3">
-          {business.phone && (
+          {business.whatsapp && (
             <a
               href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
                 business.whatsapp
