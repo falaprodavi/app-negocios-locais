@@ -17,7 +17,7 @@ const LoginPage = () => {
 
     try {
       await AuthService.login(email, password);
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(
         err.response?.data?.message || "Credenciais inválidas. Tente novamente."

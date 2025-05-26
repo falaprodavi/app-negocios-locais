@@ -1,86 +1,78 @@
 import React from "react";
-import { FaWhatsapp, FaInstagram, FaHeart, FaShareAlt } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaShareAlt } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Link } from "react-router-dom";
+import FavoriteButton from "./FavoriteButton";
 
 const Card = ({ business, loading = false }) => {
-  const cleanPhoneNumber = (whatsapp) => {
-    return whatsapp.replace(/\D/g, ""); // Remove tudo que não é dígito
-  };
+  const cleanPhoneNumber = (whatsapp) => whatsapp.replace(/\D/g, "");
 
   if (loading) {
     return (
-      <div className="bg-white rounded shadow">
-        <header className="p-4">
-          <h3 className="text-lg font-bold">
+      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div className="p-4">
+          <h3 className="text-lg font-semibold">
             <Skeleton width={180} />
           </h3>
           <p className="text-xs text-gray-400 uppercase">
             <Skeleton width={120} />
           </p>
-        </header>
-
-        <section>
-          <Skeleton height={192} className="w-full" />
-          <p className="text-sm text-gray-600 p-4">
-            <Skeleton count={2} />
-          </p>
-        </section>
-
-        <footer className="p-4 flex justify-between items-center">
+        </div>
+        <Skeleton height={192} className="w-full" />
+        <div className="p-4">
+          <Skeleton count={2} />
+        </div>
+        <div className="p-4 flex justify-between items-center border-t">
           <Skeleton width={80} height={20} />
-
           <div className="flex space-x-3">
-            <Skeleton circle width={24} height={24} />
-            <Skeleton circle width={24} height={24} />
-            <Skeleton circle width={24} height={24} />
-            <Skeleton circle width={24} height={24} />
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} circle width={24} height={24} />
+            ))}
           </div>
-        </footer>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded shadow">
-      <header className="p-4">
-        <h3 className="text-lg font-bold">{business.name}</h3>
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
+      <div className="p-4">
+        <h3 className="text-lg font-semibold">{business.name}</h3>
         <p className="text-[10px] text-gray-400 uppercase">
           <span className="font-bold text-[#042f4a]">
             {business.category?.name || "Categoria"} -{" "}
           </span>
           {business.address?.neighborhood?.name}, {business.address?.city?.name}
         </p>
-      </header>
+      </div>
 
-      <section>
-        {business.photos?.[0] && (
-          <Link to={`/business/${business.slug}`}>
-            <div className="relative overflow-hidden group">
-              <img
-                alt={business.name}
-                src={business.photos[0]}
-                className="w-full h-64 object-cover group-hover:scale-105 transition-all duration-300"
-              />
-              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-            </div>
-          </Link>
-        )}
-        <p className="text-sm text-gray-600 p-4">
-          {business.description?.slice(0, 100)}...
-        </p>
-      </section>
+      {business.photos?.[0] && (
+        <Link to={`/business/${business.slug}`}>
+          <div className="relative group overflow-hidden">
+            <img
+              alt={business.name}
+              src={business.photos[0]}
+              className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105 rounded-b-2xl"
+            />
+            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </Link>
+      )}
 
-      <footer className="p-4 flex justify-between items-center">
+      <div className="p-4 text-sm text-gray-600">
+        {business.description?.slice(0, 100)}...
+      </div>
+
+      <div className="p-4 flex justify-between items-center border-t">
         <Link
           to={`/business/${business.slug}`}
-          className="uppercase font-bold text-sm text-[#042f4a] hover:underline"
+          className="uppercase font-semibold text-xs text-[#042f4a] hover:underline"
         >
-          VER MAIS
+          Ver mais
         </Link>
 
-        <div className="flex space-x-3">
+        <div className="flex items-center space-x-3">
           {business.phone && (
             <a
               href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
@@ -90,7 +82,7 @@ const Card = ({ business, loading = false }) => {
               rel="noopener noreferrer"
               aria-label="WhatsApp"
             >
-              <FaWhatsapp className="text-green-500 text-2xl" />
+              <FaWhatsapp className="text-green-500 text-xl hover:text-green-600 transition-colors" />
             </a>
           )}
 
@@ -101,19 +93,17 @@ const Card = ({ business, loading = false }) => {
               rel="noopener noreferrer"
               aria-label="Instagram"
             >
-              <FaInstagram className="text-pink-600 text-2xl" />
+              <FaInstagram className="text-pink-500 text-xl hover:text-pink-600 transition-colors" />
             </a>
           )}
 
-          <button aria-label="Favoritar">
-            <FaHeart className="text-red-500 text-2xl" />
-          </button>
+          <FavoriteButton businessId={business._id} />
 
           <button aria-label="Compartilhar">
-            <FaShareAlt className="text-gray-600 text-2xl" />
+            <FaShareAlt className="text-gray-500 text-xl hover:text-gray-700 transition-colors" />
           </button>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };

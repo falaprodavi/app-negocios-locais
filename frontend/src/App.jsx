@@ -17,6 +17,7 @@ import NeighborhoodsPage from "./pages/dashboard/NeighborhoodsPage";
 import SubCategoriesPage from "./pages/dashboard/SubCategoriesPage";
 import BusinessPage from "./pages/dashboard/BusinessPage";
 import BusinessDetails from "./pages/BusinessDetails";
+import UserFavorites from "./pages/UserFavorites";
 
 function MainLayout() {
   const location = useLocation();
@@ -37,17 +38,18 @@ function App() {
   return (
     <>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         {/* Rotas com layout principal (Navbar + Footer) */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/business/:slug" element={<BusinessDetails />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
         </Route>
 
         {/* Rotas protegidas com layout de dashboard */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/favorites" element={<UserFavorites />} />
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/business" element={<BusinessPage />} />
