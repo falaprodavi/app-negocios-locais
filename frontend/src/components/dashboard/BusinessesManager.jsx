@@ -7,7 +7,6 @@ import NeighborhoodService from "../../api/services/neighborhood";
 import useScrollToTop from "../../hooks/useScrollToTop";
 import { formatPhoneNumber } from "../../utils/formatPhone";
 
-
 const BusinessesManager = () => {
   const handlePhoneChange = (e) => {
     const { name, value } = e.target;
@@ -225,6 +224,11 @@ const BusinessesManager = () => {
           formDataToSend.append("photos", photo);
         }
       });
+
+      // Se estiver editando e houver novas fotos, envie photosAction: "append"
+      if (editingId && formData.photos.some((photo) => photo instanceof File)) {
+        formDataToSend.append("photosAction", "append");
+      }
 
       if (editingId) {
         await BusinessService.update(editingId, formDataToSend);

@@ -1,75 +1,146 @@
-import React from "react";
-import { Bar } from "react-chartjs-2";
+import React, { useEffect, useRef, useState } from "react";
+import { Chart, registerables } from "chart.js";
 import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { eachDayOfInterval, endOfMonth, format, parseISO, startOfMonth } from "date-fns";
-import { utcToZonedTime } from "date-fns-tz";
+  format,
+  parseISO,
+  eachDayOfInterval,
+  startOfMonth,
+  endOfMonth,
+} from "date-fns";
+import ptBR from "date-fns/locale/pt-BR";
+import BusinessService from "../../api/services/business";
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+Chart.register(...registerables);
 
-const MonthlyBusinessChart = ({ data }) => {
-  const timeZone = "America/Sao_Paulo";
+const MonthlyBusinessChart = () => {
+  const chartContainerRef = useRef(null);
+  const chartInstance = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
 
-  // Gera uma lista de dias do mês atual
-  const now = new Date();
-  const allDays = eachDayOfInterval({
-    start: startOfMonth(now),
-    end: endOfMonth(now),
-  });
-
-  const dailyCounts = allDays.map((day) => {
-    const dayStr = format(day, "yyyy-MM-dd");
-
-    const count = data.filter((b) => {
-      const utcDate = parseISO(b.createdAt);
-      const zonedDate = utcToZonedTime(utcDate, timeZone);
-      const zonedDateStr = format(zonedDate, "yyyy-MM-dd");
-      return zonedDateStr === dayStr;
-    }).length;
-
-    return {
-      date: dayStr,
-      count,
+  // Buscar dados da API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await BusinessService.getBusinessesByDate();
+        setData(response.data.data);
+      } catch (err) {
+        console.error("Erro ao buscar dados:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
-  });
 
-  const chartData = {
-    labels: dailyCounts.map((d) => format(parseISO(d.date), "dd/MM")),
-    datasets: [
-      {
-        label: "Cadastros por dia",
-        data: dailyCounts.map((d) => d.count),
-        backgroundColor: "#4f46e5",
-      },
-    ],
-  };
+    fetchData();
+  }, []);
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-        },
-      },
-    },
-  };
+  // Renderizar gráfico
+  useEffect(() => {
+    if (!data || !chartContainerRef.current) return;
+
+    const renderChart = () => {
+      try {
+        const currentDate = new Date();
+        const monthStart = startOfMonth(currentDate);
+        const monthEnd = endOfMonth(currentDate);
+
+        const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+        const dailyCounts = allDays.map((day) => {
+          const dayStr = format(day, "yyyy-MM-dd");
+
+          return {
+            date: dayStr,
+            count: data.filter((b) => {
+              const utcDate = parseISO(b.createdAt);
+              const localDate = new Date(
+                utcDate.getTime() + new Date().getTimezoneOffset() * 60000
+              );
+              const localDateStr = format(localDate, "yyyy-MM-dd");
+              return localDateStr === dayStr;
+            }).length,
+          };
+        });
+
+        if (chartInstance.current) {
+          chartInstance.current.destroy();
+        }
+
+        let canvas = chartContainerRef.current.querySelector("canvas");
+        if (!canvas) {
+          canvas = document.createElement("canvas");
+          chartContainerRef.current.appendChild(canvas);
+        }
+
+        const ctx = canvas.getContext("2d");
+        chartInstance.current = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: dailyCounts.map((item) =>
+              format(new Date(item.date), "dd/MM", { locale: ptBR })
+            ),
+            datasets: [
+              {
+                label: "Estabelecimentos cadastrados",
+                data: dailyCounts.map((item) => item.count),
+                backgroundColor: "rgba(59, 130, 246, 0.7)",
+                borderColor: "rgba(59, 130, 246, 1)",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.parsed.y} estabelecimento(s)`,
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                  precision: 0,
+                },
+              },
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Erro ao renderizar gráfico:", err);
+        setError("Erro ao renderizar gráfico");
+      }
+    };
+
+    renderChart();
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [data]);
+
+  if (loading)
+    return <div className="text-center py-8">Carregando gráfico...</div>;
+  if (error)
+    return <div className="text-center py-8 text-red-500">Erro: {error}</div>;
 
   return (
-    <div style={{ width: "100%", height: "400px" }}>
-      <Bar data={chartData} options={options} />
+    <div className="bg-white p-6 rounded-lg shadow">
+      <h2 className="text-xl font-semibold mb-4">Cadastros Mensais</h2>
+      <div className="h-80 relative">
+        <div ref={chartContainerRef} className="w-full h-full"></div>
+      </div>
     </div>
   );
 };

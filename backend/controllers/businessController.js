@@ -110,7 +110,6 @@ exports.getBusiness = async (req, res) => {
 };
 
 // Atualizar um estabelecimento
-// Atualizar um estabelecimento
 exports.updateBusiness = async (req, res) => {
   try {
     let updateData = { ...req.body };
@@ -133,15 +132,15 @@ exports.updateBusiness = async (req, res) => {
       else {
         updateData.photos = photos;
       }
+    } else {
+      // Se não houver novas fotos, mantenha as existentes
+      delete updateData.photos; // Evita sobrescrever as fotos existentes
     }
 
     const updated = await Business.findByIdAndUpdate(
       req.params.id,
       updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     if (!updated) {

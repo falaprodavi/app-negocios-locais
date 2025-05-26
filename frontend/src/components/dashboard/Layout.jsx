@@ -8,6 +8,8 @@ import {
   MdOutlineCategory,
   MdMap,
   MdMyLocation,
+  MdArrowForwardIos,
+  MdArrowBackIosNew,
 } from "react-icons/md";
 
 const Layout = () => {
@@ -33,7 +35,7 @@ const Layout = () => {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 rounded-md hover:bg-blue-700"
           >
-            {sidebarOpen ? "<<" : ">>"}
+            {sidebarOpen ? <MdArrowBackIosNew /> : <MdArrowForwardIos />}
           </button>
         </div>
         <nav className="mt-6">

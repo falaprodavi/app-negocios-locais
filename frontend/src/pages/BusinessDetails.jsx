@@ -66,7 +66,7 @@ const BusinessDetails = () => {
     );
 
   return (
-    <div className="w-full px-4 md:px-16 lg:px-24 xl:px-32 mt-24 py-8">
+    <div className="w-full mt-14 px-4 md:px-16 lg:px-24 xl:px-32 md:mt-24 py-8">
       {/* Carrossel de Fotos */}
       <div className="relative mb-8 rounded-lg overflow-hidden">
         {/* Botão de Favoritos */}
