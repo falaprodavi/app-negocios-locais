@@ -155,7 +155,7 @@ const LoginPage = () => {
             </div>
           </form>
 
-          {/*          <div className="mt-6 text-center text-sm">
+          <div className="mt-6 text-center text-sm">
             <p className="text-gray-600">
               Não tem uma conta?{" "}
               <Link
@@ -163,9 +163,16 @@ const LoginPage = () => {
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Cadastre-se
+              </Link>{" "}
+              ou{" "}
+              <Link
+                to="/"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Ir para o Site
               </Link>
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

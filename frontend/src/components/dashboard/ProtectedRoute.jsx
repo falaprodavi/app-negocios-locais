@@ -52,7 +52,7 @@ const ProtectedRoute = ({ requiredRole = "user" }) => {
   }
 
   if (requiredRole === "admin" && authState.userRole !== "admin") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

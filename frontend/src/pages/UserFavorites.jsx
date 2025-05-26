@@ -46,9 +46,21 @@ const UserFavorites = () => {
   if (loading) return <div className="loading">Carregando...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate("/login");
+  };
+
   return (
     <div className="user-favorites">
       <h1>Meus Favoritos</h1>
+
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+      >
+        Sair
+      </button>
 
       {favorites.length === 0 ? (
         <p>Você ainda não adicionou nenhum estabelecimento aos favoritos.</p>

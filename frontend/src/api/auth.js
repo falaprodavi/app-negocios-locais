@@ -33,12 +33,21 @@ const AuthService = {
   getCurrentUser: async () => {
     try {
       const response = await api.get("/auth/me");
-      return response.data;
+      return response.data.data; // ← Acesse a propriedade data aninhada
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
       }
-      return null; // Retorna null sem redirecionar
+      return null;
+    }
+  },
+
+  isAdmin: async () => {
+    try {
+      const user = await AuthService.getCurrentUser();
+      return user?.role === "admin";
+    } catch (error) {
+      return false;
     }
   },
 };

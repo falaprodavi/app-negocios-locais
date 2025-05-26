@@ -18,6 +18,7 @@ import SubCategoriesPage from "./pages/dashboard/SubCategoriesPage";
 import BusinessPage from "./pages/dashboard/BusinessPage";
 import BusinessDetails from "./pages/BusinessDetails";
 import UserFavorites from "./pages/UserFavorites";
+import Unauthorized from "./pages/Unauthorized";
 
 function MainLayout() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
         {/* Rotas com layout principal (Navbar + Footer) */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
@@ -47,9 +49,8 @@ function App() {
           <Route path="/business/:slug" element={<BusinessDetails />} />
         </Route>
 
-        {/* Rotas protegidas com layout de dashboard */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/favorites" element={<UserFavorites />} />
+        {/* Rotas protegidas para admin com layout de dashboard */}
+        <Route element={<ProtectedRoute requiredRole="admin" />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/business" element={<BusinessPage />} />
@@ -64,6 +65,10 @@ function App() {
               element={<NeighborhoodsPage />}
             />
           </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/favorites" element={<UserFavorites />} />
         </Route>
 
         {/* Redirecionamento para página não encontrada */}
