@@ -40,9 +40,6 @@ const Card = ({ business, loading = false }) => {
       <div className="p-4">
         <h3 className="text-lg font-semibold">{business.name}</h3>
         <p className="text-[10px] text-gray-400 uppercase">
-          <span className="font-bold text-[#042f4a]">
-            {business.category?.name || "Categoria"} -{" "}
-          </span>
           {business.address?.neighborhood?.name}, {business.address?.city?.name}
         </p>
       </div>
@@ -55,6 +52,10 @@ const Card = ({ business, loading = false }) => {
               src={business.photos[0]}
               className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105 rounded-b-2xl"
             />
+            {/* Tag da categoria */}
+            <div className="absolute top-2 left-2 bg-blue-400 text-white text-[10px] uppercase font-bold py-1 px-2 rounded">
+              {business.category?.name || "Categoria"}
+            </div>
             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         </Link>
