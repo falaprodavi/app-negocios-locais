@@ -8,7 +8,7 @@ const Title = ({
 }) => {
   return (
     <div
-      className={`flex flex-col justify-center mb-16 ${
+      className={`flex flex-col justify-center mb-8 md:mb-16 ${
         align === "left" ? "items-start text-left" : "items-center text-center"
       }`}
     >

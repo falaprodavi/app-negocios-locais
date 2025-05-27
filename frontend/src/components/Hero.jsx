@@ -23,7 +23,7 @@ const Hero = () => {
   } = useSearch();
 
   return (
-    <div className="relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center min-h-[85vh]">
+    <div className="min-h-[70vh] relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center md:min-h-[85vh]">
       <div className="absolute inset-0 bg-black/50"></div>
 
       <div className="relative z-10 w-full max-w-6xl text-center">
@@ -39,7 +39,7 @@ const Hero = () => {
           {city.join(", ")} e muito mais
         </p>
 
-        <div className="w-full flex justify-center">
+        <div className="md:w-full md:flex justify-center">
           <HorizontalSearchForm
             searchParams={searchParams}
             cities={cities}

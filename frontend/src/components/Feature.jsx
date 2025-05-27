@@ -27,7 +27,7 @@ const Feature = ({ limit = 6, fetchFunction = BusinessService.getLatest }) => {
     return <div className="text-center p-8 text-red-500">Erro: {error}</div>;
 
   return (
-    <div className="flex flex-col items-center md:px-24 pt-20 mb-20 bg-slate-50 py-20">
+    <div className="flex flex-col items-center px-4 pb-12 md:px-24 pt-20 md:mb-20 bg-slate-50 md:py-20">
       <Title
         title="Últimos estabelecimentos cadastrados"
         subTitle="Descubra as empresas cuidadosamente selecionadas para atender às suas necessidades!"

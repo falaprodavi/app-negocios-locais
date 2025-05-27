@@ -5,7 +5,7 @@ import City from "./City";
 
 const Cities = () => {
   return (
-    <div className="flex flex-col items-center px-6 md:px-16 lg:px-24 xl:px-32 mb-12">
+    <div className="mt-8 flex flex-col items-center px-12 md:px-16 lg:px-24 xl:px-32 mb-12">
       <div className="flex flex-col md:flex-row items-center justify-between w-full">
         <Title
           align="left"
