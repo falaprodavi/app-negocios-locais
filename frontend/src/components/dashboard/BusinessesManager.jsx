@@ -674,7 +674,7 @@ const BusinessesManager = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                LinkedIn
+                Site
               </label>
               <input
                 type="text"

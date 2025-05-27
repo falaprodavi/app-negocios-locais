@@ -11,7 +11,17 @@ import {
 import useScrollToTop from "../hooks/useScrollToTop";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import FavoriteButton from "../components/FavoriteButton";
+
+// Corrige o caminho dos ícones para funcionar com Vite
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconUrl: "/leaflet/marker-icon.png",
+  shadowUrl: "/leaflet/marker-shadow.png",
+  iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+});
 
 const BusinessDetails = () => {
   const { slug } = useParams(); // usando slug
@@ -20,6 +30,8 @@ const BusinessDetails = () => {
   const navigate = useNavigate();
 
   useScrollToTop();
+
+  const cleanPhoneNumber = (whatsapp) => whatsapp.replace(/\D/g, "");
 
   const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
 
@@ -344,7 +356,9 @@ const BusinessDetails = () => {
 
             {business.whatsapp && (
               <a
-                href={`https://wa.me/${business.whatsapp}`}
+                href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
+                  business.whatsapp
+                )}&text=Encontrei+sua+empresa+no+Guia+Do+Vale&type=phone_number&app_absent=0`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-green-600 mb-3"
@@ -380,13 +394,13 @@ const BusinessDetails = () => {
 
             {business.linkedin && (
               <a
-                href={`https://linkedin.com/${business.linkedin}`}
+                href={business.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-blue-700 mb-3"
               >
-                <FaLinkedin size={20} />
-                <span>LinkedIn</span>
+                <FaGlobe size={20} />
+                <span>Site Oficial</span>
               </a>
             )}
 
