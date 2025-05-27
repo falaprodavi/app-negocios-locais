@@ -14,33 +14,24 @@ const {
   getBusinessesByDate,
 } = require("../controllers/businessController");
 
-const { optimizeUploadedImages } = require("../middleware/optimizeUploadedImages");
-
-router.get("/dashboard/stats", getDashboardStats);
-router.get("/dashboard/recent-businesses", getRecentBusinesses);
-router.get("/by-date", getBusinessesByDate);
-
-router.get("/latest", getLatestBusinesses);
-router.get("/slug/:slug", getBusinessBySlug);
-
 const { protect, authorize } = require("../middleware/auth");
-const {
-  uploadBusinessCreate,
-  uploadBusinessPhotos,
-} = require("../utils/fileUpload");
+const { uploadBusinessPhotos } = require("../middleware/upload");
 
 // GET /api/businesses/search
 router.get("/search", searchBusinesses);
+router.get("/dashboard/stats", getDashboardStats);
+router.get("/dashboard/recent-businesses", getRecentBusinesses);
+router.get("/by-date", getBusinessesByDate);
+router.get("/latest", getLatestBusinesses);
+router.get("/slug/:slug", getBusinessBySlug);
 
-// Protege criação, edição e exclusão
 router
   .route("/")
   .get(getBusinesses)
   .post(
     protect,
     authorize("admin", "owner"),
-    uploadBusinessCreate,
-    optimizeUploadedImages, 
+    uploadBusinessPhotos.array("photos", 10),
     createBusiness
   );
 
@@ -51,7 +42,6 @@ router
     protect,
     authorize("admin", "owner"),
     uploadBusinessPhotos.array("photos", 10),
-    optimizeUploadedImages, 
     updateBusiness
   )
   .delete(protect, authorize("admin", "owner"), deleteBusiness);

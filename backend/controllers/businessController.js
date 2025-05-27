@@ -5,7 +5,6 @@ const SubCategory = require("../models/SubCategory");
 const Business = require("../models/Business");
 const path = require("path");
 
-
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalBusinesses = await Business.countDocuments();
@@ -46,7 +45,7 @@ exports.getRecentBusinesses = async (req, res) => {
 };
 
 // Criar um novo estabelecimento
-exports.createBusiness = async (req, res) => {
+/* exports.createBusiness = async (req, res) => {
   try {
     const photos = req.files.map(
       (file) =>
@@ -64,6 +63,62 @@ exports.createBusiness = async (req, res) => {
     });
 
     res.status(201).json({ success: true, data: business });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}; */
+
+// Criar um novo estabelecimento
+exports.createBusiness = async (req, res) => {
+  try {
+    const photos = req.files.map((file) => file.path); // Cloudinary URL
+
+    const business = await Business.create({
+      ...req.body,
+      photos,
+      owner: req.user._id,
+    });
+
+    res.status(201).json({ success: true, data: business });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// Atualizar um estabelecimento
+exports.updateBusiness = async (req, res) => {
+  try {
+    let updateData = { ...req.body };
+
+    if (req.files && req.files.length > 0) {
+      const photos = req.files.map((file) => file.path); // Cloudinary URL
+
+      if (req.body.photosAction === "append") {
+        const business = await Business.findById(req.params.id);
+        updateData.photos = [...business.photos, ...photos];
+      } else {
+        updateData.photos = photos;
+      }
+    } else {
+      delete updateData.photos;
+    }
+
+    const updated = await Business.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Estabelecimento não encontrado" });
+    }
+
+    res.json({ success: true, data: updated });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -113,7 +168,7 @@ exports.getBusiness = async (req, res) => {
 };
 
 // Atualizar um estabelecimento
-exports.updateBusiness = async (req, res) => {
+/* exports.updateBusiness = async (req, res) => {
   try {
     let updateData = { ...req.body };
 
@@ -156,7 +211,7 @@ exports.updateBusiness = async (req, res) => {
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
-};
+}; */
 
 // Excluir um estabelecimento
 exports.deleteBusiness = async (req, res) => {
