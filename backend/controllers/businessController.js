@@ -3,6 +3,8 @@ const Neighborhood = require("../models/Neighborhood");
 const Category = require("../models/Category");
 const SubCategory = require("../models/SubCategory");
 const Business = require("../models/Business");
+const path = require("path");
+
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -34,14 +36,11 @@ exports.getRecentBusinesses = async (req, res) => {
       .populate("category", "name")
       .select("name photos createdAt slug");
 
-    console.log("Negócios encontrados:", businesses.length); // ← Confirma a query
-
     res.json({
       success: true,
       data: businesses, // ← Formato padronizado
     });
   } catch (err) {
-    console.error("❌ Erro no controller:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -51,15 +50,19 @@ exports.createBusiness = async (req, res) => {
   try {
     const photos = req.files.map(
       (file) =>
-        `${req.protocol}://${req.get("host")}/uploads/businesses/${
-          file.filename
-        }`
+        `${req.protocol}://${req.get(
+          "host"
+        )}/uploads/businesses/${path.basename(
+          file.optimizedPath || file.filename
+        )}`
     );
+
     const business = await Business.create({
       ...req.body,
       photos,
       owner: req.user._id,
     });
+
     res.status(201).json({ success: true, data: business });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -114,33 +117,33 @@ exports.updateBusiness = async (req, res) => {
   try {
     let updateData = { ...req.body };
 
-    // Se houver arquivos enviados, processá-los
     if (req.files && req.files.length > 0) {
       const photos = req.files.map(
         (file) =>
-          `${req.protocol}://${req.get("host")}/uploads/businesses/${
-            file.filename
-          }`
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/businesses/${path.basename(
+            file.optimizedPath || file.filename
+          )}`
       );
 
-      // Se for para adicionar às fotos existentes
       if (req.body.photosAction === "append") {
         const business = await Business.findById(req.params.id);
         updateData.photos = [...business.photos, ...photos];
-      }
-      // Se for para substituir todas as fotos
-      else {
+      } else {
         updateData.photos = photos;
       }
     } else {
-      // Se não houver novas fotos, mantenha as existentes
-      delete updateData.photos; // Evita sobrescrever as fotos existentes
+      delete updateData.photos;
     }
 
     const updated = await Business.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true, runValidators: true }
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
     if (!updated) {

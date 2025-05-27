@@ -14,6 +14,8 @@ const {
   getBusinessesByDate,
 } = require("../controllers/businessController");
 
+const { optimizeUploadedImages } = require("../middleware/optimizeUploadedImages");
+
 router.get("/dashboard/stats", getDashboardStats);
 router.get("/dashboard/recent-businesses", getRecentBusinesses);
 router.get("/by-date", getBusinessesByDate);
@@ -38,6 +40,7 @@ router
     protect,
     authorize("admin", "owner"),
     uploadBusinessCreate,
+    optimizeUploadedImages, 
     createBusiness
   );
 
@@ -48,6 +51,7 @@ router
     protect,
     authorize("admin", "owner"),
     uploadBusinessPhotos.array("photos", 10),
+    optimizeUploadedImages, 
     updateBusiness
   )
   .delete(protect, authorize("admin", "owner"), deleteBusiness);
