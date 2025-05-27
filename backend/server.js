@@ -9,7 +9,13 @@ const app = express();
 const { protect, authorize } = require("./middleware/auth");
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://app-negocios-locais.vercel.app", // permite só seu frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Servir arquivos estáticos (para as imagens)
