@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const categories = require("../controllers/categories");
-const { uploadCategoryIcon } = require("../utils/fileUpload");
+const { uploadCategoryIcon } = require("../middleware/upload");
 const { protect, authorize } = require("../middleware/auth");
 
 // Listar todas
@@ -32,11 +32,6 @@ router.put(
 );
 
 // Deletar categoria (protegido)
-router.delete(
-  "/:id",
-  protect,
-  authorize("admin"),
-  categories.deleteCategory
-);
+router.delete("/:id", protect, authorize("admin"), categories.deleteCategory);
 
 module.exports = router;
