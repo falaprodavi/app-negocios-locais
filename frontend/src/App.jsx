@@ -19,6 +19,7 @@ import BusinessPage from "./pages/dashboard/BusinessPage";
 import BusinessDetails from "./pages/BusinessDetails";
 import UserFavorites from "./pages/UserFavorites";
 import Unauthorized from "./pages/Unauthorized";
+import About from "./pages/About";
 
 function MainLayout() {
   const location = useLocation();
@@ -46,6 +47,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/quem-somos" element={<About />} />
           <Route path="/business/:slug" element={<BusinessDetails />} />
         </Route>
 

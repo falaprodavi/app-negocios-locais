@@ -5,7 +5,7 @@ import { assets } from "../assets/assets";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Explore", path: "/explore" },
-  { name: "O Vale", path: "/ovale" },
+  { name: "Quem Somos", path: "/quem-somos" },
   { name: "Contato", path: "/contato" },
 ];
 
