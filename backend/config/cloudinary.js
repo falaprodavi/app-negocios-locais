@@ -1,26 +1,34 @@
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'businesses', // pasta no Cloudinary
-    allowed_formats: ['jpg', 'png', 'jpeg', 'svg'],
+    folder: "businesses", // pasta no Cloudinary
+    allowed_formats: ["jpg", "png", "jpeg", "svg"],
   },
 });
 
 const cityStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'cities',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'svg'],
+    folder: "cities",
+    allowed_formats: ["jpg", "png", "jpeg", "svg"],
   },
 });
 
-module.exports = { cloudinary, storage, cityStorage };
+const categoryStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "categories",
+    allowed_formats: ["jpg", "png", "jpeg", "svg"],
+  },
+});
+
+module.exports = { cloudinary, storage, cityStorage, categoryStorage };
