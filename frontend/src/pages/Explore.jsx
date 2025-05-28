@@ -32,6 +32,21 @@ const Explore = () => {
 
   useScrollToTop([pagination.page, searchParams]);
 
+  useEffect(() => {
+    document.title = "O Vale Online - Explore";
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+
+    if (!metaDescription) {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+
+    metaDescription.content =
+      "Descubra os melhores estabelecimentos do Vale do Paraíba! Encontre restaurantes, lojas, serviços e muito mais.";
+  }, []);
+
   const fetchResults = async () => {
     try {
       setLoading(true);

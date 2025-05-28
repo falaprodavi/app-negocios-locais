@@ -36,6 +36,25 @@ const BusinessDetails = () => {
   const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
 
   useEffect(() => {
+    if (business) {
+      // Atualiza o título da página
+      document.title = `${business.name} - O Vale Online`;
+
+      // Atualiza ou cria a meta description
+      let metaDescription = document.querySelector('meta[name="description"]');
+
+      if (!metaDescription) {
+        metaDescription = document.createElement("meta");
+        metaDescription.name = "description";
+        document.head.appendChild(metaDescription);
+      }
+
+      metaDescription.content =
+        business.description || `Conheça ${business.name}`;
+    }
+  }, [business]);
+
+  useEffect(() => {
     const fetchBusiness = async () => {
       try {
         const response = await BusinessService.getBySlug(slug);
