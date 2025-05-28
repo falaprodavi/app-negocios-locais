@@ -15,4 +15,12 @@ const storage = new CloudinaryStorage({
   },
 });
 
-module.exports = { cloudinary, storage };
+const cityStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'cities',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'svg'],
+  },
+});
+
+module.exports = { cloudinary, storage, cityStorage };

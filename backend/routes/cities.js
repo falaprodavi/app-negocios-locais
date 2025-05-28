@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const cities = require("../controllers/cities");
-const { uploadCityImage } = require("../utils/fileUpload");
+//const { uploadCityImage } = require("../utils/fileUpload");
 const { protect, authorize } = require("../middleware/auth");
+const { uploadCityImage } = require('../middleware/upload');
+
 
 // Listar todas
 router.get("/", cities.getAllCities);

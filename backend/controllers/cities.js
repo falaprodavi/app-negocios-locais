@@ -1,15 +1,14 @@
 const Business = require("../models/Business");
 const City = require("../models/City");
-const fs = require("fs");
-const path = require("path");
 const slugify = require("slugify");
+const { cloudinary } = require("../config/cloudinary");
 
 exports.getAllCities = async (req, res) => {
   try {
     const cities = await City.find();
     res.json(cities);
   } catch (err) {
-    res.status(500).json({ error: "Erro ao buscar categorias." });
+    res.status(500).json({ error: "Erro ao buscar cidades." });
   }
 };
 
@@ -42,15 +41,16 @@ exports.createCity = async (req, res) => {
     }
 
     let image = null;
+    let imagePublicId = null;
+
     if (req.file) {
-      image = `${req.protocol}://${req.get("host")}/uploads/cities/${
-        req.file.filename
-      }`;
+      image = req.file.path; // URL completa do Cloudinary
+      imagePublicId = req.file.filename; // geralmente filename é igual ao public_id
     }
 
     const slug = slugify(name, { lower: true, strict: true });
 
-    const city = new City({ name, slug, image });
+    const city = new City({ name, slug, image, imagePublicId });
     await city.save();
     res.status(201).json(city);
   } catch (err) {
@@ -65,21 +65,17 @@ exports.updateCity = async (req, res) => {
   try {
     const { name } = req.body;
     const file = req.file;
-    let image;
-
-    if (file) {
-      image = `${req.protocol}://${req.get("host")}/uploads/cities/${
-        file.filename
-      }`;
-    }
 
     const updateData = {};
+
     if (name) {
       updateData.name = name;
       updateData.slug = slugify(name, { lower: true, strict: true });
     }
-    if (image) {
-      updateData.image = image;
+
+    if (file) {
+      updateData.image = file.path;
+      updateData.imagePublicId = file.filename;
     }
 
     const updatedCity = await City.findByIdAndUpdate(
@@ -101,8 +97,7 @@ exports.updateCity = async (req, res) => {
   }
 };
 
-// controllers/cities.js
-exports.deleteCity = async (req, res, next) => {
+exports.deleteCity = async (req, res) => {
   try {
     const city = await City.findByIdAndDelete(req.params.id);
 
@@ -113,13 +108,13 @@ exports.deleteCity = async (req, res, next) => {
       });
     }
 
-    // Opcional: Remover a imagem associada
-    if (city.image) {
-      const fs = require("fs");
-      const path = require("path");
-      const imagePath = path.join(__dirname, "..", "public", city.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+    // Se tiver imagem no Cloudinary, deleta
+    if (city.imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(city.imagePublicId);
+        console.log("Imagem do Cloudinary excluída:", city.imagePublicId);
+      } catch (err) {
+        console.error("Erro ao excluir imagem do Cloudinary:", err);
       }
     }
 
