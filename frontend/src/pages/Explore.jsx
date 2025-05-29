@@ -19,6 +19,7 @@ const Explore = () => {
     perPage: parseInt(searchParams.get("perPage")) || 9,
     total: 0,
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const {
     searchParams: searchFilters,
@@ -47,19 +48,27 @@ const Explore = () => {
       "Descubra os melhores estabelecimentos do Vale do Paraíba! Encontre restaurantes, lojas, serviços e muito mais.";
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setShowMobileFilters(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchResults = async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams(searchParams.toString());
 
-      // Sempre força a página 1 quando os parâmetros de busca mudam
       if (searchParams.toString() !== queryParams.toString()) {
         queryParams.set("page", "1");
       }
 
       queryParams.set("perPage", pagination.perPage);
-
-      // ADICIONE ESTA LINHA PARA ORDENAÇÃO ALEATÓRIA (logo acima da chamada da API)
       queryParams.set("random", "true");
 
       const res = await api.get(`/businesses/search?${queryParams.toString()}`);
@@ -90,7 +99,6 @@ const Explore = () => {
     const newPagination = { ...pagination, page: newPage };
     setPagination(newPagination);
 
-    // Atualiza a URL sem disparar um novo fetch
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage);
     navigate(`?${params.toString()}`, { replace: true });
@@ -103,11 +111,10 @@ const Explore = () => {
     const newPagination = {
       ...pagination,
       perPage: newPerPage,
-      page: 1, // Reset para a página 1 ao mudar itens por página
+      page: 1,
     };
     setPagination(newPagination);
 
-    // Atualiza a URL
     const params = new URLSearchParams(searchParams);
     params.set("perPage", newPerPage);
     params.set("page", "1");
@@ -117,23 +124,24 @@ const Explore = () => {
   const handleSearchSubmit = (params) => {
     const newSearchParams = new URLSearchParams();
 
-    // Adiciona os novos parâmetros de busca
     Object.entries(params).forEach(([key, value]) => {
       if (value) newSearchParams.set(key, value);
     });
 
-    // Reseta a paginação para a primeira página
     newSearchParams.set("page", "1");
     newSearchParams.set("perPage", pagination.perPage.toString());
 
-    // Atualiza a URL
     navigate(`?${newSearchParams.toString()}`);
 
-    // Atualiza o estado local da paginação
     setPagination((prev) => ({
       ...prev,
       page: 1,
     }));
+
+    // Fecha os filtros em mobile após aplicar
+    if (window.innerWidth < 1024) {
+      setShowMobileFilters(false);
+    }
   };
 
   const totalPages = Math.ceil(pagination.total / pagination.perPage);
@@ -141,10 +149,40 @@ const Explore = () => {
   if (error) return <div className="p-4 mt-24 text-red-500">{error}</div>;
 
   return (
-    <div className="w-full mt-16 px-4  md:mt-24 p-4 flex flex-col lg:flex-row gap-8 ">
+    <div className="w-full mt-16 px-4 md:mt-24 p-4 flex flex-col lg:flex-row gap-8">
+      {/* Botão Filtrar (apenas mobile) */}
+      <button
+        onClick={() => setShowMobileFilters(!showMobileFilters)}
+        className="lg:hidden bg-[#042f4a] text-white py-2 px-4 rounded-md mb-4 flex items-center justify-center gap-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+            clipRule="evenodd"
+          />
+        </svg>
+        {showMobileFilters ? "Ocultar Filtros" : "Filtrar"}
+      </button>
+
       {/* Sidebar com SearchForm */}
-      <aside className="w-full lg:w-80">
-        <VerticalSearchForm />
+      <aside
+        className={`w-full lg:w-80 ${
+          !showMobileFilters ? "hidden lg:block" : "block"
+        }`}
+      >
+        <VerticalSearchForm
+          onSubmit={() => {
+            if (window.innerWidth < 1024) {
+              setShowMobileFilters(false);
+            }
+          }}
+        />
       </aside>
 
       {/* Conteúdo principal */}

@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { useSearch } from "../hooks/useSearch"; // Se criar um hook customizado
+import { useSearch } from "../hooks/useSearch";
 
-const VerticalSearchForm = () => {
+const VerticalSearchForm = ({ onSubmit }) => {
   const {
     searchParams,
     cities,
@@ -14,10 +11,20 @@ const VerticalSearchForm = () => {
     handleSearchSubmit,
   } = useSearch();
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleSearchSubmit(searchParams); // Chama a função original do hook
+
+    // Chama a função onSubmit se existir
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="w-full bg-white p-4 rounded-lg shadow-md">
       <h3 className="text-lg font-semibold mb-4">Filtrar resultados</h3>
-      <form onSubmit={handleSearchSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Campo de Nome */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700 mb-1">
