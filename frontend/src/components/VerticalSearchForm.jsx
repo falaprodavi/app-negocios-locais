@@ -28,7 +28,7 @@ const VerticalSearchForm = () => {
             name="name"
             value={searchParams.name}
             onChange={handleSearchChange}
-            className="w-full px-4 py-1.5 rounded-lg border border-gray-300 text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-1.5 rounded-lg border border-gray-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-blue-950"
             placeholder="Digite o nome"
           />
         </div>

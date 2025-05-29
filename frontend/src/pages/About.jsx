@@ -7,7 +7,8 @@ const About = () => {
         {/* Imagem ilustrativa */}
         <div className="md:w-1/2">
           <img
-            src="../src/assets/quem-somos.svg"
+            src="https://res.cloudinary.com/dgqhiieda/image/upload/f_webp/q_auto/v1748545901/vale_assets/guiadovale_oxs8pp.png
+"
             alt="Quem Somos"
             className="w-full h-64 object-cover md:h-full"
           />

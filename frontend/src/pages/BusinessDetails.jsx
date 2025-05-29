@@ -14,9 +14,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import FavoriteButton from "../components/FavoriteButton";
 
-// Corrige o caminho dos ícones para funcionar com Vite
 delete L.Icon.Default.prototype._getIconUrl;
-
 L.Icon.Default.mergeOptions({
   iconUrl: "/leaflet/marker-icon.png",
   shadowUrl: "/leaflet/marker-shadow.png",
@@ -24,31 +22,25 @@ L.Icon.Default.mergeOptions({
 });
 
 const BusinessDetails = () => {
-  const { slug } = useParams(); // usando slug
+  const { slug } = useParams();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const navigate = useNavigate();
 
   useScrollToTop();
 
-  const cleanPhoneNumber = (whatsapp) => whatsapp.replace(/\D/g, "");
-
-  const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
-
   useEffect(() => {
     if (business) {
-      // Atualiza o título da página
       document.title = `${business.name} - O Vale Online`;
 
-      // Atualiza ou cria a meta description
       let metaDescription = document.querySelector('meta[name="description"]');
-
       if (!metaDescription) {
         metaDescription = document.createElement("meta");
         metaDescription.name = "description";
         document.head.appendChild(metaDescription);
       }
-
       metaDescription.content =
         business.description || `Conheça ${business.name}`;
     }
@@ -69,6 +61,68 @@ const BusinessDetails = () => {
     fetchBusiness();
   }, [slug, navigate]);
 
+  const cleanPhoneNumber = (phone) => {
+    return phone.replace(/\D/g, "");
+  };
+
+  /**
+   * Otimiza imagens do Cloudinary com parâmetros avançados
+   * @param {string} url - URL original da imagem
+   * @param {Object} options - Opções de otimização
+   * @param {number} [options.width] - Largura desejada
+   * @param {number} [options.quality=80] - Qualidade (0-100)
+   * @param {string} [options.format='auto'] - Formato da imagem
+   * @param {boolean} [options.crop=false] - Se deve cortar a imagem
+   * @returns {string} URL otimizada
+   */
+  const optimizeImage = (url, options = {}) => {
+    if (!url || !url.includes("cloudinary.com")) return url;
+
+    const {
+      width,
+      quality = 80,
+      format = "auto",
+      crop = false,
+      gravity = "auto",
+    } = options;
+
+    const transformations = [];
+
+    // Formato e qualidade
+    transformations.push(`f_${format}`, `q_${quality}`);
+
+    // Largura se especificada
+    if (width) transformations.push(`w_${width}`);
+
+    // Recorte se necessário
+    if (crop) {
+      transformations.push("c_fill");
+      if (gravity) transformations.push(`g_${gravity}`);
+    }
+
+    // Otimizações avançadas
+    transformations.push(
+      "fl_progressive", // Progressivo para JPEG
+      "dpr_auto", // Densidade de pixel automática
+      "e_sharpen:100" // Melhoria de nitidez
+    );
+
+    // Substitui o caminho de upload com as transformações
+    return url.replace("/upload/", `/upload/${transformations.join(",")}/`);
+  };
+
+  /**
+   * Gera um srcset responsivo para imagens
+   * @param {string} url - URL original da imagem
+   * @param {number[]} widths - Array de larguras
+   * @returns {string} String srcset
+   */
+  const generateSrcSet = (url, widths = [300, 600, 900, 1200]) => {
+    return widths
+      .map((width) => `${optimizeImage(url, { width })} ${width}w`)
+      .join(", ");
+  };
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-64">
@@ -86,21 +140,33 @@ const BusinessDetails = () => {
       {/* Galeria Elegante - Versão Responsiva */}
       {business.photos.length > 0 && (
         <div className="mb-8">
-          {/* Layout para desktop */}
+          {/* Desktop */}
           <div className="hidden md:block relative w-full h-96">
             <div className="absolute inset-0 flex gap-2">
-              {/* Foto principal */}
+              {/* Principal */}
               {business.photos[0] && (
-                <div className="h-full w-full rounded-lg overflow-hidden flex-1 min-w-[50%]">
+                <div
+                  className="h-full w-full rounded-lg overflow-hidden flex-1 min-w-[50%] cursor-pointer"
+                  onClick={() => {
+                    setSelectedImageIndex(0);
+                    setIsGalleryExpanded(true);
+                  }}
+                >
                   <img
-                    src={business.photos[0]}
+                    src={optimizeImage(business.photos[0], {
+                      width: 800,
+                      quality: 85,
+                    })}
+                    srcSet={generateSrcSet(business.photos[0])}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     alt={`${business.name} 1`}
-                    className="w-full h-full object-cover transition-all duration-500 hover:scale-105 "
+                    className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
+                    loading="eager"
                   />
                 </div>
               )}
 
-              {/* Fotos secundárias */}
+              {/* Secundárias */}
               <div className="flex-1 flex flex-col gap-2 min-w-[25%]">
                 <div className="flex gap-2 h-1/2">
                   {[1, 2].map(
@@ -108,12 +174,26 @@ const BusinessDetails = () => {
                       business.photos[index] && (
                         <div
                           key={index}
-                          className="flex-1 rounded-lg overflow-hidden"
+                          className="flex-1 rounded-lg overflow-hidden cursor-pointer"
+                          onClick={() => {
+                            setSelectedImageIndex(index);
+                            setIsGalleryExpanded(true);
+                          }}
                         >
                           <img
-                            src={business.photos[index]}
+                            src={optimizeImage(business.photos[index], {
+                              width: 400,
+                              quality: 80,
+                            })}
+                            srcSet={generateSrcSet(business.photos[index], [
+                              200,
+                              400,
+                              600,
+                            ])}
+                            sizes="(max-width: 768px) 100vw, 25vw"
                             alt={`${business.name} ${index + 1}`}
-                            className="w-full h-full object-cover transition-all duration-500 hover:scale-105 "
+                            className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
+                            loading="lazy"
                           />
                         </div>
                       )
@@ -125,12 +205,26 @@ const BusinessDetails = () => {
                       business.photos[index] && (
                         <div
                           key={index}
-                          className="flex-1 rounded-lg overflow-hidden"
+                          className="flex-1 rounded-lg overflow-hidden cursor-pointer"
+                          onClick={() => {
+                            setSelectedImageIndex(index);
+                            setIsGalleryExpanded(true);
+                          }}
                         >
                           <img
-                            src={business.photos[index]}
+                            src={optimizeImage(business.photos[index], {
+                              width: 400,
+                              quality: 80,
+                            })}
+                            srcSet={generateSrcSet(business.photos[index], [
+                              200,
+                              400,
+                              600,
+                            ])}
+                            sizes="(max-width: 768px) 100vw, 25vw"
                             alt={`${business.name} ${index + 1}`}
-                            className="w-full h-full object-cover transition-all duration-500 hover:scale-105 "
+                            className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
+                            loading="lazy"
                           />
                         </div>
                       )
@@ -138,17 +232,30 @@ const BusinessDetails = () => {
                 </div>
               </div>
 
-              {/* Fotos adicionais */}
+              {/* Botão de expansão */}
               {business.photos.length > 5 && (
                 <div
                   className="flex-1 flex flex-col gap-2 min-w-[25%] cursor-pointer"
-                  onClick={() => setIsGalleryExpanded(true)}
+                  onClick={() => {
+                    setSelectedImageIndex(5);
+                    setIsGalleryExpanded(true);
+                  }}
                 >
                   <div className="h-full rounded-lg overflow-hidden relative">
                     <img
-                      src={business.photos[5]}
+                      src={optimizeImage(business.photos[5], {
+                        width: 400,
+                        quality: 80,
+                      })}
+                      srcSet={generateSrcSet(business.photos[5], [
+                        200,
+                        400,
+                        600,
+                      ])}
+                      sizes="(max-width: 768px) 100vw, 25vw"
                       alt={`${business.name} 6`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center hover:bg-opacity-20 transition-all">
                       <span className="text-white text-xl font-medium">
@@ -161,56 +268,72 @@ const BusinessDetails = () => {
             </div>
           </div>
 
-          {/* Layout para mobile */}
+          {/* Mobile */}
           <div className="md:hidden flex gap-2 h-48">
-            {/* Coluna principal (60% width) */}
-            {business.photos[0] && (
-              <div className="w-3/5 h-full rounded-lg overflow-hidden">
-                <img
-                  src={business.photos[0]}
-                  alt={`${business.name} 1`}
-                  className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
-                  onClick={() => setIsGalleryExpanded(true)}
-                />
-              </div>
-            )}
+            <div className="w-3/5 h-full rounded-lg overflow-hidden">
+              <img
+                src={optimizeImage(business.photos[0], {
+                  width: 400,
+                  quality: 85,
+                })}
+                srcSet={generateSrcSet(business.photos[0], [200, 400, 600])}
+                sizes="(max-width: 768px) 60vw, 30vw"
+                alt={`${business.name} 1`}
+                className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
+                onClick={() => {
+                  setSelectedImageIndex(0);
+                  setIsGalleryExpanded(true);
+                }}
+                loading="eager"
+              />
+            </div>
 
-            {/* Coluna secundária (40% width) */}
             <div className="w-2/5 flex flex-col gap-2 h-full">
-              {business.photos[1] && (
-                <div className="h-1/2 rounded-lg overflow-hidden">
-                  <img
-                    src={business.photos[1]}
-                    alt={`${business.name} 2`}
-                    className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
-                    onClick={() => setIsGalleryExpanded(true)}
-                  />
-                </div>
-              )}
-
-              {business.photos[2] && (
-                <div className="h-1/2 rounded-lg overflow-hidden relative">
-                  <img
-                    src={business.photos[2]}
-                    alt={`${business.name} 3`}
-                    className="w-full h-full object-cover"
-                  />
-                  {business.photos.length > 3 && (
+              {[1, 2].map(
+                (index) =>
+                  business.photos[index] && (
                     <div
-                      className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center hover:bg-opacity-20 transition-all cursor-pointer"
-                      onClick={() => setIsGalleryExpanded(true)}
+                      key={index}
+                      className="h-1/2 rounded-lg overflow-hidden relative"
                     >
-                      <span className="text-white text-sm font-medium">
-                        +{business.photos.length - 3}
-                      </span>
+                      <img
+                        src={optimizeImage(business.photos[index], {
+                          width: 200,
+                          quality: 80,
+                        })}
+                        srcSet={generateSrcSet(business.photos[index], [
+                          100,
+                          200,
+                          300,
+                        ])}
+                        sizes="(max-width: 768px) 40vw, 20vw"
+                        alt={`${business.name} ${index + 1}`}
+                        className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
+                        onClick={() => {
+                          setSelectedImageIndex(index);
+                          setIsGalleryExpanded(true);
+                        }}
+                        loading="lazy"
+                      />
+                      {index === 1 && business.photos.length > 3 && (
+                        <div
+                          className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center hover:bg-opacity-20 transition-all cursor-pointer"
+                          onClick={() => {
+                            setSelectedImageIndex(2);
+                            setIsGalleryExpanded(true);
+                          }}
+                        >
+                          <span className="text-white text-sm font-medium">
+                            +{business.photos.length - 3}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  )
               )}
             </div>
           </div>
 
-          {/* Contador de fotos (mobile e desktop) */}
           <div className="text-sm text-gray-500 mt-2 text-center">
             {business.photos.length}{" "}
             {business.photos.length === 1 ? "foto" : "fotos"}
@@ -218,12 +341,13 @@ const BusinessDetails = () => {
         </div>
       )}
 
-      {/* Modal/Lightbox Responsivo */}
+      {/* Modal Expandido */}
       {isGalleryExpanded && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-white text-xl font-bold">
-              Galeria de Fotos ({business.photos.length})
+              {business.name} - Foto {selectedImageIndex + 1} de{" "}
+              {business.photos.length}
             </h2>
             <button
               onClick={() => setIsGalleryExpanded(false)}
@@ -233,46 +357,71 @@ const BusinessDetails = () => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-auto">
-            {/* 1 coluna no mobile, 2 em tablets, 3 em desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {business.photos.map((photo, index) => (
-                <div key={index} className="rounded-lg overflow-hidden">
-                  <img
-                    src={photo}
-                    alt={`${business.name} ${index + 1}`}
-                    className="w-full h-auto max-h-[80vh] object-contain"
-                  />
-                </div>
-              ))}
+          <div className="flex-1 flex items-center justify-center relative">
+            {/* Imagem principal */}
+            <div className="max-w-full max-h-[80vh] flex items-center justify-center">
+              <img
+                src={optimizeImage(business.photos[selectedImageIndex], {
+                  quality: 90,
+                })}
+                alt={`${business.name} ${selectedImageIndex + 1}`}
+                className="max-w-full max-h-[80vh] object-contain"
+                loading="eager"
+              />
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Lightbox/Modal */}
-      {isGalleryExpanded && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-white text-xl font-bold">
-              Galeria de Fotos ({business.photos.length})
-            </h2>
-            <button
-              onClick={() => setIsGalleryExpanded(false)}
-              className="text-white text-2xl hover:text-gray-300"
-            >
-              &times;
-            </button>
+            {/* Navegação */}
+            {business.photos.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex((prev) =>
+                      prev === 0 ? business.photos.length - 1 : prev - 1
+                    );
+                  }}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                >
+                  &larr;
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex((prev) =>
+                      prev === business.photos.length - 1 ? 0 : prev + 1
+                    );
+                  }}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                >
+                  &rarr;
+                </button>
+              </>
+            )}
           </div>
 
-          <div className="flex-1 overflow-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Miniaturas */}
+          <div className="mt-4 overflow-x-auto">
+            <div className="flex space-x-2 justify-center">
               {business.photos.map((photo, index) => (
-                <div key={index} className="rounded-lg overflow-hidden">
+                <div
+                  key={index}
+                  className={`w-16 h-16 rounded overflow-hidden cursor-pointer border-2 ${
+                    index === selectedImageIndex
+                      ? "border-blue-500"
+                      : "border-transparent"
+                  }`}
+                  onClick={() => setSelectedImageIndex(index)}
+                >
                   <img
-                    src={photo}
-                    alt={`${business.name} ${index + 1}`}
-                    className="w-full h-auto max-h-[80vh] object-contain"
+                    src={optimizeImage(photo, {
+                      width: 80,
+                      height: 80,
+                      crop: true,
+                      quality: 60,
+                    })}
+                    alt={`Miniatura ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               ))}

@@ -49,7 +49,7 @@ const Card = ({ business, loading = false }) => {
           <div className="relative group overflow-hidden">
             <img
               alt={business.name}
-              src={business.photos[0].replace("/upload/", "/upload/f_auto/")}
+              src={business.photos[0].replace("/upload/", "/upload/f_webp/q_auto/")}
               className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105 rounded-b-2xl"
             />
             {/* Tag da categoria */}

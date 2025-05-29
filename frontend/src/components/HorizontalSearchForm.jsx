@@ -24,7 +24,7 @@ const HorizontalSearchForm = ({
           value={searchParams.name}
           onChange={onSearchChange}
           placeholder="Digite o nome"
-          className="w-full px-4 py-1.5 rounded-lg border border-gray-300 text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-1.5 rounded-lg border border-gray-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
           disabled={isLoading}
         />
       </div>
