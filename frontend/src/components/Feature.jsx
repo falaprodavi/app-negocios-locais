@@ -27,11 +27,13 @@ const Feature = ({ limit = 6, fetchFunction = BusinessService.getLatest }) => {
     return <div className="text-center p-8 text-red-500">Erro: {error}</div>;
 
   return (
-    <div className="flex flex-col items-center px-4 pb-12 md:px-24 pt-20 md:mb-20 bg-slate-50 md:py-20">
-      <Title
-        title="Últimos estabelecimentos cadastrados"
-        subTitle="Descubra as empresas cuidadosamente selecionadas para atender às suas necessidades!"
-      />
+    <div className="flex flex-col items-center px-1 pb-12 md:px-24 pt-20 md:mb-20 bg-slate-50 md:py-20">
+      <div className="px-4">
+        <Title
+          title="Últimos estabelecimentos cadastrados"
+          subTitle="Descubra as empresas cuidadosamente selecionadas para atender às suas necessidades!"
+        />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 w-full">
         {loading
