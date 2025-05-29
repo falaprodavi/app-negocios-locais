@@ -40,7 +40,7 @@ const City = () => {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 rounded-2xl" />
 
               <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md text-gray-700 font-light text-xs px-3 py-1 rounded-full shadow-sm group-hover:bg-opacity-90 transition-all">
-                {city.businessCount} estabelecimentos
+                {city.totalBusinesses} estabelecimentos
               </span>
             </div>
 
