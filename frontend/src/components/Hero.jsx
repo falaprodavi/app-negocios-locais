@@ -23,8 +23,8 @@ const Hero = () => {
   } = useSearch();
 
   return (
-    <div className="min-h-[70vh] relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('/src/assets/heroImage.png')] bg-cover bg-center md:min-h-[85vh]">
-      <div className="absolute inset-0 bg-black/50"></div>
+    <div className="min-h-[70vh] md:min-h-[85vh] relative flex flex-col items-center justify-center px-4 md:px-8 py-16 text-white bg-[url('https://res.cloudinary.com/dgqhiieda/image/upload/f_webp,q_80,w_1200/v1748523085/vale_assets/willian-justen-de-vasconcellos-_MMP5j_fCqw-unsplash_quudsq.jpg')] bg-cover bg-center">
+      <div className="absolute inset-0 bg-black/40"></div>
 
       <div className="relative z-10 w-full max-w-6xl text-center">
         <span className="inline-block text-xs md:text-sm bg-[#042f4a] px-3.5 py-1 rounded-full mb-4">
