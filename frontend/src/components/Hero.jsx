@@ -7,7 +7,11 @@ const Hero = () => {
     "São José dos Campos",
     "Taubaté",
     "Jacareí",
-    "Pinda",
+    "Pindamonhangaba",
+    "Tremembé",
+    "Caraguatatuba",
+    "Ilha Bela",
+    "Ubatuba",
     // ... outras cidades
   ];
 
@@ -32,7 +36,7 @@ const Hero = () => {
         </span>
 
         <h1 className="text-3xl md:text-5xl font-bold mb-4">
-          Encontre tudo que deseja no Vale
+          Encontre tudo que deseja no Vale do Paraíba
         </h1>
 
         <p className="text-sm md:text-base mb-8 max-w-2xl mx-auto">

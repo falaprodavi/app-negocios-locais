@@ -143,52 +143,6 @@ exports.getBusiness = async (req, res) => {
   }
 };
 
-// Atualizar um estabelecimento
-/* exports.updateBusiness = async (req, res) => {
-  try {
-    let updateData = { ...req.body };
-
-    if (req.files && req.files.length > 0) {
-      const photos = req.files.map(
-        (file) =>
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/businesses/${path.basename(
-            file.optimizedPath || file.filename
-          )}`
-      );
-
-      if (req.body.photosAction === "append") {
-        const business = await Business.findById(req.params.id);
-        updateData.photos = [...business.photos, ...photos];
-      } else {
-        updateData.photos = photos;
-      }
-    } else {
-      delete updateData.photos;
-    }
-
-    const updated = await Business.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Estabelecimento não encontrado" });
-    }
-
-    res.json({ success: true, data: updated });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-}; */
-
 // Excluir um estabelecimento
 exports.deleteBusiness = async (req, res) => {
   try {
@@ -211,23 +165,23 @@ exports.searchBusinesses = async (req, res) => {
   try {
     const {
       name,
-      city, // Mantemos o nome original do parâmetro
-      neighborhood, // Mantemos o nome original do parâmetro
+      city,
+      neighborhood,
       category,
       subcategory,
       page = 1,
       perPage = 9,
+      random = false,
     } = req.query;
 
     const filter = {};
 
-    // Filtro por nome (mantido igual)
+    // Filtro por nome
     if (name) filter.name = { $regex: name, $options: "i" };
 
-    // 1. Primeiro encontra a cidade (se especificada)
+    // Filtro por cidade
     let cityId;
     if (city) {
-      // Agora usando 'city' em vez de 'citySlug'
       const cityDoc = await City.findOne({ slug: city });
       if (!cityDoc) {
         return res.json({
@@ -240,11 +194,10 @@ exports.searchBusinesses = async (req, res) => {
       filter["address.city"] = cityId;
     }
 
-    // 2. Filtro de bairro (agora vinculado à cidade)
+    // Filtro de bairro
     if (neighborhood) {
-      // Agora usando 'neighborhood' em vez de 'neighborhoodSlug'
       const neighborhoodFilter = { slug: neighborhood };
-      if (cityId) neighborhoodFilter.city = cityId; // Filtro combinado
+      if (cityId) neighborhoodFilter.city = cityId;
 
       const neighborhoodDoc = await Neighborhood.findOne(neighborhoodFilter);
       if (!neighborhoodDoc) {
@@ -257,7 +210,7 @@ exports.searchBusinesses = async (req, res) => {
       filter["address.neighborhood"] = neighborhoodDoc._id;
     }
 
-    // Restante dos filtros (mantidos iguais)
+    // Filtros de categoria e subcategoria
     if (category) {
       const categoryDoc = await Category.findOne({ slug: category });
       if (categoryDoc) filter.category = categoryDoc._id;
@@ -268,27 +221,92 @@ exports.searchBusinesses = async (req, res) => {
       if (subCategoryDoc) filter.subCategory = subCategoryDoc._id;
     }
 
-    // Paginação (mantida igual)
     const currentPage = parseInt(page);
     const itemsPerPage = parseInt(perPage);
     const skip = (currentPage - 1) * itemsPerPage;
 
-    const [businesses, totalCount] = await Promise.all([
-      Business.find(filter)
-        .skip(skip)
-        .limit(itemsPerPage)
-        .populate(
-          "category subCategory address.city address.neighborhood owner"
-        )
-        .lean(),
-      Business.countDocuments(filter),
-    ]);
+    let businesses;
+    let totalCount;
 
-    // Formatação dos resultados (mantida igual)
+    if (random === "true" || random === true) {
+      // Abordagem para resultados aleatórios usando aggregate
+      businesses = await Business.aggregate([
+        { $match: filter },
+        { $sample: { size: itemsPerPage } },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "category",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "subcategories",
+            localField: "subCategory",
+            foreignField: "_id",
+            as: "subCategory",
+          },
+        },
+        { $unwind: { path: "$subCategory", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "cities",
+            localField: "address.city",
+            foreignField: "_id",
+            as: "address.city",
+          },
+        },
+        {
+          $unwind: { path: "$address.city", preserveNullAndEmptyArrays: true },
+        },
+        {
+          $lookup: {
+            from: "neighborhoods",
+            localField: "address.neighborhood",
+            foreignField: "_id",
+            as: "address.neighborhood",
+          },
+        },
+        {
+          $unwind: {
+            path: "$address.neighborhood",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+          },
+        },
+        { $unwind: { path: "$owner", preserveNullAndEmptyArrays: true } },
+      ]);
+
+      totalCount = await Business.countDocuments(filter);
+    } else {
+      // Abordagem normal com find() e populate()
+      [businesses, totalCount] = await Promise.all([
+        Business.find(filter)
+          .skip(skip)
+          .limit(itemsPerPage)
+          .populate(
+            "category subCategory address.city address.neighborhood owner"
+          )
+          .lean(),
+        Business.countDocuments(filter),
+      ]);
+    }
+
+    // Formatação dos resultados
     const formattedBusinesses = businesses.map((business) => ({
       ...business,
-      citySlug: business.address.city?.slug,
-      neighborhoodSlug: business.address.neighborhood?.slug,
+      citySlug: business.address?.city?.slug,
+      neighborhoodSlug: business.address?.neighborhood?.slug,
       categorySlug: business.category?.slug,
       subCategorySlug: business.subCategory?.slug,
     }));

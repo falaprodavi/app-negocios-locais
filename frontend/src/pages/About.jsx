@@ -1,6 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const About = () => {
+  useEffect(() => {
+    document.title = "O Vale Online - Quem Somos";
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+
+    if (!metaDescription) {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+
+    metaDescription.content =
+      "Somos uma plataforma especializada na divulgação dos melhores estabelecimentos do Vale do Paraíba";
+  }, []);
   return (
     <div className="container mx-auto px-4 py-12 mt-16 md:mt-24">
       <div className="bg-white rounded-2xl shadow-md overflow-hidden md:flex md:items-center md:space-x-8">
