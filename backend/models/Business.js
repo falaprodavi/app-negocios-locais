@@ -11,20 +11,21 @@ const BusinessSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, "A descrição é obrigatória"],
-    maxlength: [500, "A descrição não pode ter mais de 500 caracteres"],
+    maxlength: [2000, "A descrição não pode ter mais de 500 caracteres"],
   },
   phone: {
     type: String,
     required: [true, "O telefone é obrigatório"],
   },
   whatsapp: String,
-  photos: [String], 
-  video: String, 
+  photos: [String],
+  video: String,
   instagram: String,
   facebook: String,
   linkedin: String,
   twitter: String,
   tiktok: String,
+  site: String,
   address: {
     street: {
       type: String,
@@ -73,7 +74,7 @@ const BusinessSchema = new mongoose.Schema({
   slug: {
     type: String,
     unique: true,
-  }
+  },
 });
 
 // Gera o slug automaticamente antes de salvar

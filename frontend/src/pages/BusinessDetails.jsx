@@ -518,6 +518,14 @@ const BusinessDetails = () => {
             )}
           </div>
 
+          {/* Contato / Endereço */}
+
+          <div className="bg-white rounded-lg shadow p-4 text-gray-700">
+            {business.address.street}, {business.address.number},{" "}
+            {business.address?.neighborhood?.name},{" "}
+            {business.address?.city?.name}/SP
+          </div>
+
           {/* Contato / Redes Sociais */}
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="font-semibold mb-3">Contato</h3>
@@ -567,17 +575,17 @@ const BusinessDetails = () => {
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-blue-700 mb-3"
               >
-                <FaGlobe size={20} />
-                <span>Site Oficial</span>
+                <FaLinkedin size={20} />
+                <span>LinkedIn</span>
               </a>
             )}
 
-            {business.website && (
+            {business.site && (
               <a
-                href={business.website}
+                href={business.site}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-gray-700"
+                className="flex items-center space-x-2 text-blue-700 mb-3"
               >
                 <FaGlobe size={20} />
                 <span>Site Oficial</span>

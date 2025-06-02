@@ -45,30 +45,6 @@ exports.getRecentBusinesses = async (req, res) => {
 };
 
 // Criar um novo estabelecimento
-/* exports.createBusiness = async (req, res) => {
-  try {
-    const photos = req.files.map(
-      (file) =>
-        `${req.protocol}://${req.get(
-          "host"
-        )}/uploads/businesses/${path.basename(
-          file.optimizedPath || file.filename
-        )}`
-    );
-
-    const business = await Business.create({
-      ...req.body,
-      photos,
-      owner: req.user._id,
-    });
-
-    res.status(201).json({ success: true, data: business });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-}; */
-
-// Criar um novo estabelecimento
 exports.createBusiness = async (req, res) => {
   try {
     const photos = req.files.map((file) => file.path); // Cloudinary URL

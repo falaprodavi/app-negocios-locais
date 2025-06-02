@@ -48,6 +48,7 @@ const BusinessesManager = () => {
     linkedin: "",
     twitter: "",
     tiktok: "",
+    site: "",
     video: "",
   });
   const [previewImages, setPreviewImages] = useState([]);
@@ -216,6 +217,7 @@ const BusinessesManager = () => {
       formDataToSend.append("linkedin", formData.linkedin);
       formDataToSend.append("twitter", formData.twitter);
       formDataToSend.append("tiktok", formData.tiktok);
+      formDataToSend.append("site", formData.site);
       formDataToSend.append("video", formData.video);
 
       // Adicionar fotos
@@ -279,6 +281,7 @@ const BusinessesManager = () => {
       linkedin: "",
       twitter: "",
       tiktok: "",
+      site: "",
       video: "",
     });
     setPreviewImages([]);
@@ -323,6 +326,7 @@ const BusinessesManager = () => {
         linkedin: businessData.linkedin || "",
         twitter: businessData.twitter || "",
         tiktok: businessData.tiktok || "",
+        site: businessData.site || "",
         video: businessData.video || "",
       });
 
@@ -674,7 +678,7 @@ const BusinessesManager = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Site
+                Linkedin
               </label>
               <input
                 type="text"
@@ -722,6 +726,22 @@ const BusinessesManager = () => {
                 value={formData.video}
                 onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Site
+              </label>
+              <input
+                type="text"
+                name="site"
+                value={formData.site}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                d
               />
             </div>
           </div>

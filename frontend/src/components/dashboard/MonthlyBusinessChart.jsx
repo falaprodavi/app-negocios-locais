@@ -6,6 +6,8 @@ import {
   eachDayOfInterval,
   startOfMonth,
   endOfMonth,
+  addMonths,
+  subMonths,
 } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 import BusinessService from "../../api/services/business";
@@ -18,6 +20,7 @@ const MonthlyBusinessChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Buscar dados da API
   useEffect(() => {
@@ -36,15 +39,27 @@ const MonthlyBusinessChart = () => {
     fetchData();
   }, []);
 
+  // Navegação entre meses
+  const handlePrevMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  const handleCurrentMonth = () => {
+    setCurrentMonth(new Date());
+  };
+
   // Renderizar gráfico
   useEffect(() => {
     if (!data || !chartContainerRef.current) return;
 
     const renderChart = () => {
       try {
-        const currentDate = new Date();
-        const monthStart = startOfMonth(currentDate);
-        const monthEnd = endOfMonth(currentDate);
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(currentMonth);
 
         const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
@@ -128,7 +143,7 @@ const MonthlyBusinessChart = () => {
         chartInstance.current.destroy();
       }
     };
-  }, [data]);
+  }, [data, currentMonth]);
 
   if (loading)
     return <div className="text-center py-8">Carregando gráfico...</div>;
@@ -137,7 +152,38 @@ const MonthlyBusinessChart = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Cadastros Mensais</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">
+          Cadastros Mensais -{" "}
+          {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+        </h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={handlePrevMonth}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            &lt;
+          </button>
+          <button
+            onClick={handleCurrentMonth}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            disabled={
+              format(currentMonth, "MM/yyyy") === format(new Date(), "MM/yyyy")
+            }
+          >
+            Hoje
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            disabled={
+              format(currentMonth, "MM/yyyy") === format(new Date(), "MM/yyyy")
+            }
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
       <div className="h-80 relative">
         <div ref={chartContainerRef} className="w-full h-full"></div>
       </div>

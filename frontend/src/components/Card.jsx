@@ -6,6 +6,11 @@ import { Link } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
 
 const Card = ({ business, loading = false }) => {
+  if (!business && !loading) {
+    console.warn("Card component received null/undefined business");
+    return null; // ou retorne um card vazio/placeholder
+  }
+
   const cleanPhoneNumber = (whatsapp) => whatsapp.replace(/\D/g, "");
 
   if (loading) {
@@ -49,7 +54,10 @@ const Card = ({ business, loading = false }) => {
           <div className="relative group overflow-hidden">
             <img
               alt={business.name}
-              src={business.photos[0].replace("/upload/", "/upload/f_webp/q_auto/")}
+              src={business.photos[0].replace(
+                "/upload/",
+                "/upload/f_webp/q_auto/"
+              )}
               className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105 rounded-b-2xl"
             />
             {/* Tag da categoria */}

@@ -21,14 +21,15 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratar erros globais
+// Interceptor para tratar erros globais - MODIFICADO
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response.status === 401) {
-      // Token expirado ou inválido - redirecionar para login
+    if (error.response?.status === 401) {
+      // Remove o token mas NÃO redireciona automaticamente
       localStorage.removeItem("token");
-      window.location = "/login";
+      console.warn("Sessão expirada ou inválida");
+      // Retorna o erro para ser tratado no componente específico
     }
     return Promise.reject(error);
   }

@@ -8,28 +8,34 @@ const FavoriteButton = ({ businessId }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
-  // Verificação de favoritos APENAS quando o componente é montado
   useEffect(() => {
     const checkAuthAndFavorites = async () => {
       try {
-        // Verifica silenciosamente se está logado SEM redirecionar
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token) {
+          setIsAuthenticated(false);
+          return;
+        }
 
         const user = await AuthService.getCurrentUser();
-        if (!user) return;
+        setIsAuthenticated(!!user);
 
-        // Só verifica favoritos se estiver autenticado
-        const { data } = await FavoriteService.getUserFavorites();
-        const favorite = data.find((fav) => fav?.business?._id === businessId);
-        if (favorite) {
-          setIsFavorite(true);
-          setFavoriteId(favorite._id);
+        if (user) {
+          const { data } = await FavoriteService.getUserFavorites();
+          const favorite = data.find(
+            (fav) => fav?.business?._id === businessId
+          );
+          if (favorite) {
+            setIsFavorite(true);
+            setFavoriteId(favorite._id);
+          }
         }
       } catch (error) {
-        console.error("Verificação inicial de favoritos falhou:", error);
+        console.error("Verificação de favoritos falhou:", error);
+        setIsAuthenticated(false);
       }
     };
 
@@ -42,14 +48,16 @@ const FavoriteButton = ({ businessId }) => {
     try {
       setLoading(true);
 
-      // Verifica autenticação apenas no clique
-      const user = await AuthService.getCurrentUser();
-      if (!user) {
-        navigate("/login", { state: { from: window.location.pathname } });
+      if (!isAuthenticated) {
+        navigate("/login", {
+          state: {
+            from: window.location.pathname,
+            message: "Por favor, faça login para gerenciar seus favoritos",
+          },
+        });
         return;
       }
 
-      // Lógica de toggle
       if (isFavorite) {
         await FavoriteService.removeFavorite(favoriteId);
         setIsFavorite(false);
@@ -57,10 +65,21 @@ const FavoriteButton = ({ businessId }) => {
       } else {
         const response = await FavoriteService.addFavorite(businessId);
         setIsFavorite(true);
-        setFavoriteId(response._id);
+        setFavoriteId(response.data._id);
       }
     } catch (error) {
       console.error("Erro ao alternar favorito:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+        navigate("/login", {
+          state: {
+            from: window.location.pathname,
+            message: "Sessão expirada. Por favor, faça login novamente",
+          },
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -70,13 +89,21 @@ const FavoriteButton = ({ businessId }) => {
     <button
       onClick={handleToggleFavorite}
       disabled={loading}
-      className={`favorite-button ${isFavorite ? "favorited" : ""}`}
       aria-label={
         isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
       }
+      className="relative"
     >
-      {isFavorite ? <FaHeart color="red" /> : <FaRegHeart color="#666" />}
-      {loading && <span className="loading-spinner"></span>}
+      {isFavorite ? (
+        <FaHeart className="text-red-500 text-xl" />
+      ) : (
+        <FaRegHeart className="text-gray-500 text-xl hover:text-red-500 transition-colors" />
+      )}
+      {loading && (
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></span>
+        </span>
+      )}
     </button>
   );
 };
