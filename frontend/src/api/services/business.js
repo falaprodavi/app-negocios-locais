@@ -130,6 +130,22 @@ const BusinessService = {
       throw enhancedError;
     }
   },
+
+  deletePhoto: async (businessId, photoUrl) => {
+    try {
+      const cleanUrl = decodeURIComponent(photoUrl);
+      const response = await api.delete(`/businesses/${businessId}/photos`, {
+        data: { photoUrl: cleanUrl },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro detalhado:", error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.message ||
+          "Falha ao excluir a foto. Verifique o console para detalhes."
+      );
+    }
+  },
 };
 
 export default BusinessService;

@@ -1,3 +1,4 @@
+const Business = require("../models/Business");
 const express = require("express");
 const router = express.Router();
 const {
@@ -12,6 +13,7 @@ const {
   getDashboardStats,
   getRecentBusinesses,
   getBusinessesByDate,
+  deleteBusinessPhoto, // Adicione esta nova importação
 } = require("../controllers/businessController");
 
 const { protect, authorize } = require("../middleware/auth");
@@ -24,6 +26,14 @@ router.get("/dashboard/recent-businesses", getRecentBusinesses);
 router.get("/by-date", getBusinessesByDate);
 router.get("/latest", getLatestBusinesses);
 router.get("/slug/:slug", getBusinessBySlug);
+
+// Nova rota para deletar fotos específicas
+router.delete(
+  "/:id/photos",
+  protect,
+  authorize("admin", "owner"),
+  deleteBusinessPhoto
+);
 
 router
   .route("/")

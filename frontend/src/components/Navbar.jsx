@@ -7,7 +7,6 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "Explore", path: "/explore" },
   { name: "Quem Somos", path: "/quem-somos" },
-  { name: "Contato", path: "/contato" },
 ];
 
 const Navbar = () => {
@@ -232,7 +231,7 @@ const Navbar = () => {
               Minha Conta
             </Link>
             <Link
-              to="/meus-favoritos"
+              to="/favorites"
               className="text-base"
               onClick={() => setIsMenuOpen(false)}
             >

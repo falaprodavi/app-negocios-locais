@@ -7,6 +7,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+function extractPublicIdFromUrl(url) {
+  const matches = url.match(/upload\/(?:v\d+\/)?([^\.]+)/);
+  return matches ? matches[1] : null;
+}
+
+async function deleteImageFromCloudinary(url) {
+  const publicId = extractPublicIdFromUrl(url);
+  if (!publicId) {
+    throw new Error("Não foi possível extrair o publicId da URL");
+  }
+  return cloudinary.uploader.destroy(publicId);
+}
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {

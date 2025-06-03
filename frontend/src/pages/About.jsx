@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
+import useScrollToTop from "../hooks/useScrollToTop";
 
 const About = () => {
+  useScrollToTop();
+
   useEffect(() => {
     document.title = "O Vale Online - Quem Somos";
 
@@ -41,11 +44,7 @@ const About = () => {
             rápida e intuitiva, utilizando filtros como cidade, bairro,
             categoria e subcategoria.
           </p>
-          <p className="text-gray-600 mb-4">
-            Não vemos iniciativas semelhantes como concorrentes, mas como{" "}
-            aliadosque, juntos, fortalecem o ecossistema local, facilitando o
-            acesso à informação e promovendo os negócios da nossa região.
-          </p>
+
           <p className="text-gray-600 mb-4">
             Prezamos pela{" "}
             <span className="font-semibold text-[#042f4a]">

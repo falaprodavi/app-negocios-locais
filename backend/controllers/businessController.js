@@ -5,6 +5,7 @@ const SubCategory = require("../models/SubCategory");
 const Business = require("../models/Business");
 const path = require("path");
 
+// Monta o Gráfico do Dasboard
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalBusinesses = await Business.countDocuments();
@@ -24,6 +25,7 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
+// MOstra os cadastrados recentes
 exports.getRecentBusinesses = async (req, res) => {
   console.log("✅ Rota acessada em:", new Date()); // ← Deve aparecer no terminal
 
@@ -67,7 +69,7 @@ exports.updateBusiness = async (req, res) => {
     let updateData = { ...req.body };
 
     if (req.files && req.files.length > 0) {
-      const photos = req.files.map((file) => file.path); // Cloudinary URL
+      const photos = req.files.map((file) => file.path);
 
       if (req.body.photosAction === "append") {
         const business = await Business.findById(req.params.id);
@@ -75,23 +77,31 @@ exports.updateBusiness = async (req, res) => {
       } else {
         updateData.photos = photos;
       }
-    } else {
-      delete updateData.photos;
+    } else if (req.body.photosToDelete) {
+      // Novo: Lidar com deleção de fotos específicas
+      const photosToDelete = JSON.parse(req.body.photosToDelete);
+      const business = await Business.findById(req.params.id);
+      updateData.photos = business.photos.filter(
+        (photo) => !photosToDelete.includes(photo)
+      );
+
+      // Opcional: Deletar do Cloudinary
+      for (const photoUrl of photosToDelete) {
+        await cloudinary.uploader.destroy(extrairPublicIdDaUrl(photoUrl));
+      }
     }
 
     const updated = await Business.findByIdAndUpdate(
       req.params.id,
       updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     if (!updated) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Estabelecimento não encontrado" });
+      return res.status(404).json({
+        success: false,
+        message: "Estabelecimento não encontrado",
+      });
     }
 
     res.json({ success: true, data: updated });
@@ -161,6 +171,72 @@ exports.deleteBusiness = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Deleta uma foto específica de um estabelecimento
+ * @route   DELETE /api/businesses/:id/photos
+ * @access  Private (admin/owner)
+ */
+exports.deleteBusinessPhoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { photoUrl } = req.body;
+
+    // Validações
+    if (!photoUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "URL da foto é obrigatória",
+      });
+    }
+
+    // Verifica se o negócio existe
+    const business = await Business.findById(id);
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        message: "Estabelecimento não encontrado",
+      });
+    }
+
+    // Remove a foto do array
+    business.photos = business.photos.filter((photo) => photo !== photoUrl);
+    await business.save();
+
+    // Remove do Cloudinary (opcional)
+    try {
+      const publicId = extractPublicIdFromUrl(photoUrl); // Você precisa implementar esta função
+      await cloudinary.uploader.destroy(publicId);
+    } catch (cloudinaryError) {
+      console.error("Erro ao deletar do Cloudinary:", cloudinaryError);
+      // Não retorna erro, pois a foto já foi removida do banco
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Foto removida com sucesso",
+      data: business.photos,
+    });
+  } catch (error) {
+    console.error("Erro ao deletar foto:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao remover foto",
+      error: error.message,
+    });
+  }
+};
+
+// Função auxiliar para extrair public_id da URL do Cloudinary
+function extractPublicIdFromUrl(url) {
+  const parts = url.split("/");
+  const uploadIndex = parts.findIndex((part) => part === "upload");
+  return parts
+    .slice(uploadIndex + 2)
+    .join("/")
+    .split(".")[0];
+}
+
+// Sistema de Busca
 exports.searchBusinesses = async (req, res) => {
   try {
     const {
@@ -331,6 +407,7 @@ exports.searchBusinesses = async (req, res) => {
   }
 };
 
+// Busca pela Slug
 exports.getBusinessBySlug = async (req, res) => {
   try {
     const business = await Business.findOne({ slug: req.params.slug }).populate(
@@ -349,6 +426,7 @@ exports.getBusinessBySlug = async (req, res) => {
   }
 };
 
+// Pega por data
 exports.getBusinessesByDate = async (req, res) => {
   try {
     const businesses = await Business.find({})

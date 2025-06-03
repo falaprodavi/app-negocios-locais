@@ -187,7 +187,7 @@ const Explore = () => {
 
       {/* Conteúdo principal */}
       <main className="flex-1">
-        <h1 className="text-2xl font-semibold mb-6">
+        <h1 className="text-lg font-semibold mb-6">
           {loading ? (
             <Skeleton width={250} height={32} />
           ) : (

@@ -21,6 +21,7 @@ const BusinessesManager = () => {
   };
 
   useScrollToTop();
+  const [loadingPhoto, setLoadingPhoto] = useState(false);
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
@@ -177,18 +178,74 @@ const BusinessesManager = () => {
     }
   };
 
+  const handleDeletePhoto = async (businessId, photoUrl) => {
+    if (window.confirm("Tem certeza que deseja excluir esta foto?")) {
+      setLoadingPhoto(true);
+      try {
+        // Decodifica a URL antes de enviar
+        const decodedUrl = decodeURIComponent(photoUrl);
+        await BusinessService.deletePhoto(businessId, decodedUrl);
+
+        // Atualiza os estados
+        setFormData((prev) => ({
+          ...prev,
+          photos: prev.photos.filter((photo) => photo !== photoUrl),
+        }));
+
+        setPreviewImages((prev) => prev.filter((img) => img !== photoUrl));
+
+        setMessage({
+          text: "Foto removida com sucesso!",
+          type: "success",
+        });
+
+        // Atualiza a lista de businesses
+        setBusinesses((prev) =>
+          prev.map((business) => {
+            if (business._id === businessId) {
+              return {
+                ...business,
+                photos: business.photos.filter((photo) => photo !== photoUrl),
+              };
+            }
+            return business;
+          })
+        );
+      } catch (error) {
+        console.error("Erro completo:", error);
+        setMessage({
+          text: error.message.includes("Falha ao excluir")
+            ? error.message
+            : "Erro ao remover foto. Verifique o console.",
+          type: "error",
+        });
+      } finally {
+        setLoadingPhoto(false);
+      }
+    }
+  };
+
   const removeImage = (index) => {
-    const newPreviewImages = [...previewImages];
-    newPreviewImages.splice(index, 1);
+    const imageToRemove = previewImages[index];
 
-    const newPhotos = [...formData.photos];
-    newPhotos.splice(index, 1);
+    // Verificar se é uma foto existente (URL) ou nova (File)
+    if (typeof imageToRemove === "string" && editingId) {
+      // É uma foto existente - chamar API para deletar
+      handleDeletePhoto(editingId, imageToRemove);
+    } else {
+      // É uma foto nova - apenas remover do estado local
+      const newPreviewImages = [...previewImages];
+      newPreviewImages.splice(index, 1);
 
-    setPreviewImages(newPreviewImages);
-    setFormData({
-      ...formData,
-      photos: newPhotos,
-    });
+      const newPhotos = [...formData.photos];
+      newPhotos.splice(index, 1);
+
+      setPreviewImages(newPreviewImages);
+      setFormData({
+        ...formData,
+        photos: newPhotos,
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -625,9 +682,33 @@ const BusinessesManager = () => {
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className={`absolute top-0 right-0 ${
+                      loadingPhoto ? "bg-gray-500" : "bg-red-500"
+                    } text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity`}
+                    disabled={loadingPhoto}
                   >
-                    ×
+                    {loadingPhoto ? (
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      "×"
+                    )}
                   </button>
                 </div>
               ))}
@@ -741,7 +822,6 @@ const BusinessesManager = () => {
                 value={formData.site}
                 onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
-                d
               />
             </div>
           </div>
