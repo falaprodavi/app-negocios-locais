@@ -3,7 +3,7 @@ import Title from "./Title";
 import BusinessService from "../api/services/business";
 import Card from "./Card";
 
-const Feature = ({ limit = 6, fetchFunction = BusinessService.getLatest }) => {
+const Feature = ({ limit = 8, fetchFunction = BusinessService.getLatest }) => {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

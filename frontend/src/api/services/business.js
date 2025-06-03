@@ -37,7 +37,7 @@ const BusinessService = {
     }
   },
 
-  getLatest: async (limit = 6) => {
+  getLatest: async (limit = 8) => {
     try {
       const response = await api.get(`/businesses/latest?limit=${limit}`);
       return response.data;
