@@ -454,7 +454,7 @@ const BusinessDetails = () => {
             <div>
               <h1 className="text-3xl font-bold mb-4">{business.name}</h1>
             </div>
-            <div className="pb-3">
+            <div className="pb-3 ml-4 mt-1">
               <FavoriteButton businessId={business._id} />
             </div>
           </div>
