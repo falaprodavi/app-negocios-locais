@@ -125,7 +125,13 @@ const DashboardManager = () => {
                         )}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {business.name}
+                            <Link
+                              to={`/business/${business.slug}`}
+                              target="_blank"
+                              className="uppercase font-semibold text-xs text-[#042f4a] "
+                            >
+                              {business.name}
+                            </Link>
                           </div>
                         </div>
                       </div>
