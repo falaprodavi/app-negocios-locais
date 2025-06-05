@@ -40,6 +40,21 @@ const Card = ({ business, loading = false }) => {
     );
   }
 
+  function sanitizeHtmlContent(html) {
+    return html.replace(/<p>(&nbsp;|\s)*<\/p>/g, "").trim();
+  }
+
+  function stripHtml(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  }
+
+  const sanitized = sanitizeHtmlContent(business.description);
+  const plainText = stripHtml(sanitized);
+  const preview =
+    plainText.length > 100 ? plainText.slice(0, 50) + "..." : plainText;
+
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
@@ -70,7 +85,7 @@ const Card = ({ business, loading = false }) => {
       )}
 
       <div className="p-4 text-sm text-gray-600">
-        {business.description?.slice(0, 100)}...
+        <p className="prose">{preview}</p>
       </div>
 
       <div className="p-4 flex justify-between items-center border-t">
