@@ -7,6 +7,7 @@ import CityService from "../../api/services/city";
 import NeighborhoodService from "../../api/services/neighborhood";
 import useScrollToTop from "../../hooks/useScrollToTop";
 import { formatPhoneNumber } from "../../utils/formatPhone";
+import { Editor } from "@tinymce/tinymce-react";
 
 const BusinessForm = () => {
   const { id } = useParams();
@@ -342,6 +343,13 @@ const BusinessForm = () => {
     );
   }
 
+  const handleEditorChange = (content) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: content,
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -393,13 +401,17 @@ const BusinessForm = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Descrição*
                 </label>
-                <textarea
-                  name="description"
+                <Editor
+                  apiKey="41g4akl67ydz2p7djq19czz32fwe3of4dm2jf6uo40qm7jvc" // opcional para funcionalidades básicas
                   value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  rows="3"
-                  required
+                  init={{
+                    height: 200,
+                    menubar: false,
+                    plugins: ["lists", "link", "paste"],
+                    toolbar:
+                      "undo redo | bold italic underline | bullist numlist | link",
+                  }}
+                  onEditorChange={handleEditorChange}
                 />
               </div>
             </div>

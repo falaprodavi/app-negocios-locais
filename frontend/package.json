@@ -13,6 +13,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.1.0",
+    "@tinymce/tinymce-react": "^6.2.1",
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
