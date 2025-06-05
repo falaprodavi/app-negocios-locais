@@ -20,6 +20,8 @@ import BusinessDetails from "./pages/BusinessDetails";
 import UserFavorites from "./pages/UserFavorites";
 import Unauthorized from "./pages/Unauthorized";
 import About from "./pages/About";
+import BusinessesList from "./pages/dashboard/BusinessesList";
+import BusinessForm from "./pages/dashboard/BusinessForm";
 
 function MainLayout() {
   const location = useLocation();
@@ -55,9 +57,18 @@ function App() {
         <Route element={<ProtectedRoute requiredRole="admin" />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/dashboard/business" element={<BusinessPage />} />
+            {/* <Route path="/dashboard/business" element={<BusinessPage />} /> */}
             <Route path="/dashboard/cities" element={<CitiesPage />} />
             <Route path="/dashboard/categories" element={<CategoriesPage />} />
+            <Route path="/dashboard/business" element={<BusinessesList />} />
+            <Route
+              path="/dashboard/business/add"
+              element={<BusinessForm />}
+            />
+            <Route
+              path="/dashboard/business/edit/:id"
+              element={<BusinessForm />}
+            />
             <Route
               path="/dashboard/subcategories"
               element={<SubCategoriesPage />}
