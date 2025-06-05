@@ -135,6 +135,11 @@ const BusinessDetails = () => {
       <div className="text-center py-10">Estabelecimento não encontrado</div>
     );
 
+  function sanitizeHtmlContent(html) {
+    // Remove <p>&nbsp;</p> e <p></p>
+    return html.replace(/<p>(&nbsp;|\s)*<\/p>/g, "").trim();
+  }
+
   return (
     <div className="w-full mt-14 px-4 md:px-16 lg:px-24 xl:px-32 md:mt-24 py-8">
       {/* Galeria Elegante - Versão Responsiva */}
@@ -473,7 +478,12 @@ const BusinessDetails = () => {
 
           {/* Descrição */}
           <div className="prose max-w-none mb-8">
-            <p className="text-gray-700">{business.description}</p>
+            <div
+              className="prose"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtmlContent(business.description),
+              }}
+            />
           </div>
         </div>
 
