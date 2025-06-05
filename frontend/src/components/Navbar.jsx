@@ -6,7 +6,7 @@ import AuthService from "../api/auth";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Explore", path: "/explore" },
-  { name: "Quem Somos", path: "/quem-somos" },
+  { name: "Quem Somos 9999", path: "/quem-somos" },
 ];
 
 const Navbar = () => {
