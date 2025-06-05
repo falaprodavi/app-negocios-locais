@@ -16,7 +16,11 @@ const BusinessesList = () => {
   const fetchData = async () => {
     try {
       const businessesData = await BusinessService.getAll();
-      setBusinesses(businessesData.data);
+      // Ordena por data de criação (createdAt) - do mais recente para o mais antigo
+      const sortedBusinesses = businessesData.data.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      setBusinesses(sortedBusinesses);
       setLoading(false);
     } catch (error) {
       setMessage({ text: "Erro ao carregar dados", type: "error" });
@@ -92,6 +96,9 @@ const BusinessesList = () => {
                   Cidade
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Data de Cadastro
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
@@ -107,6 +114,9 @@ const BusinessesList = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {business.address?.city?.name || "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(business.createdAt).toLocaleDateString("pt-BR")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap space-x-2">
                     <Link

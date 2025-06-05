@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import BusinessService from "../../api/services/business";
 import StatsCard from "./StatsCard";
-import Card from "../../components/Card";
 import MonthlyBusinessChart from "./MonthlyBusinessChart";
+import { Link } from "react-router-dom";
 
 const DashboardManager = () => {
   const [stats, setStats] = useState({
@@ -28,8 +28,7 @@ const DashboardManager = () => {
           categories: statsRes.data.data.totalCategories,
         });
 
-        // Busca últimos estabelecimentos
-        const businessesRes = await BusinessService.getRecentBusinesses();
+        const businessesRes = await BusinessService.getRecentBusinesses(6);
         setRecentBusinesses(businessesRes.data.data);
 
         setLoading({ stats: false, recent: false });
@@ -72,7 +71,6 @@ const DashboardManager = () => {
 
       <div className="grid grid-cols-1 gap-8 mb-8">
         <MonthlyBusinessChart />
-        {/* Outros componentes... */}
       </div>
 
       {/* Seção de Últimos Estabelecimentos */}
@@ -81,21 +79,86 @@ const DashboardManager = () => {
           Últimos Estabelecimentos Cadastrados
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading.recent ? (
-            Array(6)
-              .fill()
-              .map((_, i) => <Card key={`skeleton-${i}`} loading={true} />)
-          ) : recentBusinesses.length > 0 ? (
-            recentBusinesses.map((business) => (
-              <Card key={business._id} business={business} />
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8 text-gray-500">
-              Nenhum estabelecimento recente encontrado
-            </div>
-          )}
-        </div>
+        {loading.recent ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : recentBusinesses.length === 0 ? (
+          <p className="text-gray-500">
+            Nenhum estabelecimento cadastrado recentemente
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nome
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Categoria
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cidade
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Data Cadastro
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {recentBusinesses.map((business) => (
+                  <tr key={business._id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {business.photos && business.photos.length > 0 && (
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={business.photos[0]}
+                              alt={business.name}
+                            />
+                          </div>
+                        )}
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {business.name}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {business.category?.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {business.address?.city?.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {new Date(business.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <Link
+                        to={`/dashboard/business/edit/${business._id}`}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                      >
+                        Editar
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
