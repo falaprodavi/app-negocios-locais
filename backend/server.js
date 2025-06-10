@@ -13,7 +13,11 @@ const { protect, authorize } = require("./middleware/auth");
 
 app.use(
   cors({
-    origin: "https://app-negocios-locais.vercel.app", // permite só seu frontend
+    origin: [
+      "https://app-negocios-locais.vercel.app",
+      "https://www.ovaleonline.com.br",
+      "https://ovaleonline.com.br",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
