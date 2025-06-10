@@ -9,7 +9,7 @@ const app = express();
 const { protect, authorize } = require("./middleware/auth");
 
 // Middleware
-//app.use(cors());
+// app.use(cors());
 
 app.use(
   cors({

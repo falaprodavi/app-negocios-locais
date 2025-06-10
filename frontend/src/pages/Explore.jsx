@@ -149,7 +149,7 @@ const Explore = () => {
   if (error) return <div className="p-4 mt-24 text-red-500">{error}</div>;
 
   return (
-    <div className="w-full mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 px-4 md:px-16 lg:px-24 xl:px-32">
+    <div className="w-full mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 px-4 xl:px-8">
       {/* Botão Filtrar (apenas mobile) */}
       <button
         onClick={() => setShowMobileFilters(!showMobileFilters)}
@@ -172,9 +172,9 @@ const Explore = () => {
 
       {/* Sidebar com SearchForm */}
       <aside
-        className={`w-full lg:w-80 ${
+        className={`lg:w-50 ${
           !showMobileFilters ? "hidden lg:block" : "block"
-        }`}
+        } fixed lg:sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto`}
       >
         <VerticalSearchForm
           onSubmit={() => {
@@ -187,6 +187,7 @@ const Explore = () => {
 
       {/* Conteúdo principal */}
       <main className="flex-1">
+        {/* Restante do seu conteúdo... */}
         <h1 className="text-lg font-semibold mb-6">
           {loading ? (
             <Skeleton width={250} height={32} />
