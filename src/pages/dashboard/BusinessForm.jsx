@@ -409,7 +409,7 @@ const BusinessForm = () => {
                     menubar: false,
                     plugins: ["lists", "link", "paste"],
                     toolbar:
-                      "undo redo | bold italic underline | bullist numlist | link",
+                      "undo redo | bold italic underline | bullist numlist | link | alignleft aligncenter alignright alignjustify ",
                   }}
                   onEditorChange={handleEditorChange}
                 />

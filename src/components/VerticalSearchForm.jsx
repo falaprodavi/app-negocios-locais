@@ -22,7 +22,7 @@ const VerticalSearchForm = ({ onSubmit }) => {
   };
 
   return (
-    <div className="w-full bg-white p-4 rounded-lg shadow-md">
+    <div className="w-full bg-white rounded-lg shadow-md">
       <h3 className="text-lg font-semibold mb-4">Filtrar resultados</h3>
       <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Campo de Nome */}

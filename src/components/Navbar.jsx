@@ -92,7 +92,7 @@ const Navbar = () => {
 
       {/* Desktop Right Section - Sempre visível */}
       <div className="hidden md:flex items-center gap-4">
-        <Link to="/cadastrar-estabelecimento">
+        <Link to="https://wa.me/5511971622876?text=Olá,%20gostaria%20de%20cadastrar%20minha%20empresa">
           <button className="bg-[#042f4a] text-white px-4 py-2.5 rounded-full">
             Cadastre seu estabelecimento
           </button>

@@ -264,7 +264,7 @@ const Explore = () => {
 
             {/* Paginação */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-10">
+              <div className="flex justify-center items-center gap-2 mt-24 mb-24">
                 <button
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
@@ -291,7 +291,7 @@ const Explore = () => {
                       onClick={() => handlePageChange(pageNum)}
                       className={`px-4 py-2 rounded-lg transition ${
                         pagination.page === pageNum
-                          ? "bg-black text-white"
+                          ? "bg-slate-800 text-white"
                           : "border border-gray-300 text-gray-600 hover:bg-gray-100"
                       }`}
                     >
