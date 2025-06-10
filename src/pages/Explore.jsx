@@ -172,7 +172,7 @@ const Explore = () => {
 
       {/* Sidebar com SearchForm */}
       <aside
-        className={`lg:w-50 ${
+        className={`w-full z-999 lg:w-80 ${
           !showMobileFilters ? "hidden lg:block" : "block"
         } fixed lg:sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto`}
       >
@@ -186,7 +186,7 @@ const Explore = () => {
       </aside>
 
       {/* Conteúdo principal */}
-      <main className="flex-1">
+      <main className="flex-1 z-1">
         {/* Restante do seu conteúdo... */}
         <h1 className="text-lg font-semibold mb-6">
           {loading ? (
