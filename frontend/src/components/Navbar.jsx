@@ -214,11 +214,11 @@ const Navbar = () => {
         ))}
 
         <Link
-          to="/cadastrar-estabelecimento"
+          to="https://wa.me/551231997558?text=Olá,%20gostaria%20de%20cadastrar%20minha%20empresa"
           className="text-base"
           onClick={() => setIsMenuOpen(false)}
         >
-          Cadastre seu estabelecimento
+          Cadastre sua Empresa
         </Link>
 
         {currentUser ? (
