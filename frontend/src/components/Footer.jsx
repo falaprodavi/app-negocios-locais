@@ -56,7 +56,7 @@ const Footer = () => {
   }, [allCategories]);
 
   const legalLinks = [
-    { label: "Privacidade", href: "#" },
+    { label: "Privacidade", href: "/politica-privacidade" },
     { label: "Termos", href: "#" },
     { label: "Sitemap", href: "#" },
   ];

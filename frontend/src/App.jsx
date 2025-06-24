@@ -22,6 +22,7 @@ import Unauthorized from "./pages/Unauthorized";
 import About from "./pages/About";
 import BusinessesList from "./pages/dashboard/BusinessesList";
 import BusinessForm from "./pages/dashboard/BusinessForm";
+import Privacy from "./pages/Privacy";
 
 function MainLayout() {
   const location = useLocation();
@@ -50,6 +51,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/quem-somos" element={<About />} />
+          <Route path="/politica-privacidade" element={<Privacy />} />
           <Route path="/business/:slug" element={<BusinessDetails />} />
         </Route>
 
@@ -61,10 +63,7 @@ function App() {
             <Route path="/dashboard/cities" element={<CitiesPage />} />
             <Route path="/dashboard/categories" element={<CategoriesPage />} />
             <Route path="/dashboard/business" element={<BusinessesList />} />
-            <Route
-              path="/dashboard/business/add"
-              element={<BusinessForm />}
-            />
+            <Route path="/dashboard/business/add" element={<BusinessForm />} />
             <Route
               path="/dashboard/business/edit/:id"
               element={<BusinessForm />}
