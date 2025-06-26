@@ -405,7 +405,7 @@ const BusinessForm = () => {
                   apiKey="41g4akl67ydz2p7djq19czz32fwe3of4dm2jf6uo40qm7jvc" // opcional para funcionalidades básicas
                   value={formData.description}
                   init={{
-                    height: 200,
+                    height: 600,
                     menubar: false,
                     plugins: ["lists", "link", "paste"],
                     toolbar:

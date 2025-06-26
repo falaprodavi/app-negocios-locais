@@ -11,7 +11,7 @@ const BusinessSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, "A descrição é obrigatória"],
-    maxlength: [2000, "A descrição não pode ter mais de 500 caracteres"],
+    maxlength: [5000, "A descrição não pode ter mais de 5000 caracteres"],
   },
   phone: {
     type: String,
