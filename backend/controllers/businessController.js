@@ -246,7 +246,7 @@ exports.searchBusinesses = async (req, res) => {
       category,
       subcategory,
       page = 1,
-      perPage = 9,
+      perPage = 12,
       random = false,
     } = req.query;
 

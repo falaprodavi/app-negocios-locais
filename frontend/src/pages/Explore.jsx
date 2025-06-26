@@ -16,7 +16,7 @@ const Explore = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
     page: parseInt(searchParams.get("page")) || 1,
-    perPage: parseInt(searchParams.get("perPage")) || 9,
+    perPage: parseInt(searchParams.get("perPage")) || 12,
     total: 0,
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
