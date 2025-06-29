@@ -75,7 +75,7 @@ const BusinessService = {
     }
   },
 
-  search: async (filters = {}, page = 1, perPage = 12) => {
+  search: async (filters = {}, page = 1, perPage = 9) => {
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {

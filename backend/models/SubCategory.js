@@ -43,8 +43,8 @@ SubCategorySchema.index(
 // Gera o slug automaticamente antes de salvar
 SubCategorySchema.pre("save", function (next) {
   if (!this.isModified("name")) return next();
-  this.slug = slugify(this.name, { 
-    lower: true, 
+  this.slug = slugify(this.name, {
+    lower: true,
     strict: true,
     remove: /[*+~.()'"!:@]/g,
   });

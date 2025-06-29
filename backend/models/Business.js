@@ -11,7 +11,7 @@ const BusinessSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, "A descrição é obrigatória"],
-    maxlength: [5000, "A descrição não pode ter mais de 5000 caracteres"],
+    maxlength: [2000, "A descrição não pode ter mais de 500 caracteres"],
   },
   phone: {
     type: String,
@@ -52,16 +52,20 @@ const BusinessSchema = new mongoose.Schema({
   long: {
     type: String,
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: [true, "Selecione uma categoria"],
-  },
-  subCategory: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "SubCategory",
-    required: [true, "Selecione uma subcategoria"],
-  },
+  category: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: [true, "Selecione pelo menos uma categoria"],
+    },
+  ],
+  subCategory: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
+      required: [true, "Selecione pelo menos uma subcategoria"],
+    },
+  ],
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
