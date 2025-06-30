@@ -16,9 +16,11 @@ const Footer = () => {
     const fetchCategories = async () => {
       try {
         const response = await CategoryService.getAll();
-        setAllCategories(response);
+        // Acesse response.data que contém o array de categorias
+        setAllCategories(response.data || []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        setAllCategories([]); // Garante um array vazio em caso de erro
       }
     };
 
