@@ -29,11 +29,9 @@ const BusinessSchema = new mongoose.Schema({
   address: {
     street: {
       type: String,
-      required: [true, "A rua é obrigatória"],
     },
     number: {
       type: String,
-      required: [true, "O número é obrigatório"],
     },
     city: {
       type: mongoose.Schema.Types.ObjectId,

@@ -617,7 +617,6 @@ const BusinessForm = () => {
                   value={formData.address.street}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  required
                 />
               </div>
 
@@ -631,7 +630,6 @@ const BusinessForm = () => {
                   value={formData.address.number}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  required
                 />
               </div>
               <div>
