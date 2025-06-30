@@ -566,7 +566,7 @@ const BusinessForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado*
+                  Cidade*
                 </label>
                 <select
                   name="address.city"
@@ -575,7 +575,7 @@ const BusinessForm = () => {
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
                 >
-                  <option value="">Selecione um Estado</option>
+                  <option value="">Selecione um Bairro</option>
                   {cities.map((city) => (
                     <option key={city._id} value={city._id}>
                       {city.name}
@@ -586,7 +586,7 @@ const BusinessForm = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cidade*
+                  Bairro*
                 </label>
                 <select
                   name="address.neighborhood"
