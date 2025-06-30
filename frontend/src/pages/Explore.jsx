@@ -16,25 +16,15 @@ const Explore = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
     page: parseInt(searchParams.get("page")) || 1,
-    perPage: parseInt(searchParams.get("perPage")) || 12,
+    perPage: parseInt(searchParams.get("perPage")) || 9,
     total: 0,
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const {
-    searchParams: searchFilters,
-    cities,
-    neighborhoods,
-    categories,
-    subCategories,
-    isLoading: isLoadingFilters,
-    handleSearchChange,
-  } = useSearch();
-
   useScrollToTop([pagination.page, searchParams]);
 
   useEffect(() => {
-    document.title = "O Vale Online - Explore";
+    document.title = "O Vale On-Line - Explore";
 
     let metaDescription = document.querySelector('meta[name="description"]');
 
@@ -72,6 +62,7 @@ const Explore = () => {
       queryParams.set("random", "true");
 
       const res = await api.get(`/businesses/search?${queryParams.toString()}`);
+      console.log("Dados retornados:", res.data.data); // Adicione esta linha
 
       setResults(res.data.data);
       setPagination((prev) => ({
@@ -149,11 +140,11 @@ const Explore = () => {
   if (error) return <div className="p-4 mt-24 text-red-500">{error}</div>;
 
   return (
-    <div className="max-w-[1680px] mx-auto mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 px-4">
+    <div className="max-w-screen-xl mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 px-4 sm:px-6 lg:px-8 mx-auto mb-12">
       {/* Botão Filtrar (apenas mobile) */}
       <button
         onClick={() => setShowMobileFilters(!showMobileFilters)}
-        className="lg:hidden bg-[#042f4a] text-white py-2 px-4 rounded-md mb-4 flex items-center justify-center gap-2"
+        className="lg:hidden bg-[#4F583B] text-white py-2 px-4 rounded-md mb-4 flex items-center justify-center gap-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
