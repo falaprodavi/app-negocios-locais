@@ -140,7 +140,7 @@ const Explore = () => {
   if (error) return <div className="p-4 mt-24 text-red-500">{error}</div>;
 
   return (
-    <div className="max-w-screen-xl mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 px-4 sm:px-6 lg:px-8 mx-auto mb-12">
+    <div className="container mx-auto px-4 py-12 mt-16 md:mt-24 p-4 flex flex-col lg:flex-row gap-8 sm:px-6 lg:px-8 mb-12">
       {/* Botão Filtrar (apenas mobile) */}
       <button
         onClick={() => setShowMobileFilters(!showMobileFilters)}

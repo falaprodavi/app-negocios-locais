@@ -141,7 +141,7 @@ const BusinessDetails = () => {
   }
 
   return (
-    <div className="max-w-screen-xl mx-auto mt-14 px-4 sm:px-6 lg:px-8 md:mt-24 py-8">
+    <div className="container mx-auto mt-14 px-4 sm:px-6 lg:px-8 md:mt-24 py-8">
       {/* Galeria Elegante - Versão Responsiva */}
       {business.photos.length > 0 && (
         <div className="mb-8">
