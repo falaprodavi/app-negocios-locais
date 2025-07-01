@@ -557,7 +557,7 @@ const BusinessDetails = () => {
               <a
                 href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
                   business.whatsapp
-                )}&text=Oi!+Encontrei+sua+empresa+no+ORGANICOS.LIFE+gostaria+de+mais+detalhes&type=phone_number&app_absent=0`}
+                )}&text=Oi!+Encontrei+sua+empresa+no+O+VALE+ONLINE.+Gostaria+de+mais+detalhes&type=phone_number&app_absent=0`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-green-600 mb-3"
