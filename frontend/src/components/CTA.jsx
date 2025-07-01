@@ -15,9 +15,11 @@ const CTA = () => {
           Paraíba através de tecnologia e colaboração.
         </p>
         <div className="flex items-center gap-4 mt-6">
-          <button className="bg-[#042f4a] hover:bg-indigo-600 px-8 py-3 text-white font-medium rounded-lg shadow-md active:scale-95 transition-all">
-            Enviar Mensagem
-          </button>
+          <Link to="https://wa.me/551231997558?text=Olá,%20gostaria%20de%20cadastrar%20minha%20empresa">
+            <button className="bg-[#042f4a] hover:bg-indigo-600 px-8 py-3 text-white font-medium rounded-lg shadow-md active:scale-95 transition-all">
+              Enviar Mensagem
+            </button>
+          </Link>
           <Link to="/quem-somos">
             <button className="group flex items-center gap-2 px-8 py-3 font-medium border border-gray-400 rounded-lg hover:bg-gray-100 transition active:scale-95">
               Saiba Mais

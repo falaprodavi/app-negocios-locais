@@ -22,7 +22,7 @@ const City = () => {
   if (error) return <div className="text-red-500 p-4">Erro: {error}</div>;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {data.map((city) => (
         <Link
           key={city._id}
@@ -45,7 +45,7 @@ const City = () => {
             </div>
 
             <div className="p-4 flex-grow flex items-end">
-              <h3 className="font-semibold text-lg text-gray-800">
+              <h3 className="font-semibold text-sm md:text-lg text-gray-800">
                 {city.name}
               </h3>
             </div>
