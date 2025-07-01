@@ -144,7 +144,7 @@ const Explore = () => {
       {/* Botão Filtrar (apenas mobile) */}
       <button
         onClick={() => setShowMobileFilters(!showMobileFilters)}
-        className="lg:hidden bg-[#4F583B] text-white py-2 px-4 rounded-md mb-4 flex items-center justify-center gap-2"
+        className="lg:hidden bg-[#042f4a] text-white py-2 px-4 rounded-md mb-4 flex items-center justify-center gap-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
