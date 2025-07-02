@@ -65,7 +65,7 @@ const Card = ({ business, loading = false }) => {
       </div>
 
       {business.photos?.[0] && (
-        <Link to={`/business/${business.slug}`}>
+        <Link to={`/${business.slug}`}>
           <div className="relative group overflow-hidden">
             <img
               alt={business.name}

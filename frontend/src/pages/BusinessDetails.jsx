@@ -27,14 +27,19 @@ const BusinessDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [relatedBusinesses, setRelatedBusinesses] = useState([]);
   const navigate = useNavigate();
 
   useScrollToTop();
 
   useEffect(() => {
     if (business) {
-      document.title = `${business.name} - O Vale On-Line`;
+      // Título otimizado para SEO
+      document.title = `${business.name} | ${
+        business.category?.[0]?.name || "Negócio"
+      } em ${business.address?.city?.name || ""} - O Vale On-Line`;
 
+      // Meta description
       let metaDescription = document.querySelector('meta[name="description"]');
       if (!metaDescription) {
         metaDescription = document.createElement("meta");
@@ -42,7 +47,90 @@ const BusinessDetails = () => {
         document.head.appendChild(metaDescription);
       }
       metaDescription.content =
-        business.description || `Conheça ${business.name}`;
+        business.description ||
+        `Conheça ${business.name}, ${
+          business.category?.[0]?.name || "estabelecimento"
+        } em ${business.address?.city?.name || ""}. ${
+          business.address?.neighborhood?.name
+            ? `Localizado no bairro ${business.address.neighborhood.name}.`
+            : ""
+        }`;
+
+      // Meta keywords
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement("meta");
+        metaKeywords.name = "keywords";
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.content = [
+        business.name,
+        business.category?.[0]?.name,
+        ...(business.subCategory?.map((sc) => sc.name) || []),
+        business.address?.city?.name,
+        business.address?.neighborhood?.name,
+        "O Vale On-Line",
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      // Open Graph Tags
+      const setMetaTag = (property, content) => {
+        let tag = document.querySelector(`meta[property="${property}"]`);
+        if (!tag) {
+          tag = document.createElement("meta");
+          tag.setAttribute("property", property);
+          document.head.appendChild(tag);
+        }
+        tag.content = content;
+      };
+
+      setMetaTag(
+        "og:title",
+        `${business.name} | ${business.category?.[0]?.name || "Negócio"} em ${
+          business.address?.city?.name || ""
+        }`
+      );
+      setMetaTag(
+        "og:description",
+        business.description || `Conheça ${business.name} no O Vale On-Line`
+      );
+      setMetaTag(
+        "og:image",
+        business.photos?.[0]
+          ? optimizeImage(business.photos[0], { width: 1200 })
+          : ""
+      );
+      setMetaTag("og:url", window.location.href);
+      setMetaTag("og:type", "business.business");
+
+      // Twitter Card
+      setMetaTag("twitter:card", "summary_large_image");
+      setMetaTag(
+        "twitter:title",
+        `${business.name} | ${business.category?.[0]?.name || "Negócio"} em ${
+          business.address?.city?.name || ""
+        }`
+      );
+      setMetaTag(
+        "twitter:description",
+        business.description || `Conheça ${business.name} no O Vale On-Line`
+      );
+      setMetaTag(
+        "twitter:image",
+        business.photos?.[0]
+          ? optimizeImage(business.photos[0], { width: 1200 })
+          : ""
+      );
+
+      // Pré-carregar imagem principal
+      if (business.photos?.[0]) {
+        const link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = optimizeImage(business.photos[0], { width: 800 });
+        document.head.appendChild(link);
+      }
     }
   }, [business]);
 
@@ -65,16 +153,6 @@ const BusinessDetails = () => {
     return phone.replace(/\D/g, "");
   };
 
-  /**
-   * Otimiza imagens do Cloudinary com parâmetros avançados
-   * @param {string} url - URL original da imagem
-   * @param {Object} options - Opções de otimização
-   * @param {number} [options.width] - Largura desejada
-   * @param {number} [options.quality=80] - Qualidade (0-100)
-   * @param {string} [options.format='auto'] - Formato da imagem
-   * @param {boolean} [options.crop=false] - Se deve cortar a imagem
-   * @returns {string} URL otimizada
-   */
   const optimizeImage = (url, options = {}) => {
     if (!url || !url.includes("cloudinary.com")) return url;
 
@@ -87,63 +165,75 @@ const BusinessDetails = () => {
     } = options;
 
     const transformations = [];
-
-    // Formato e qualidade
     transformations.push(`f_${format}`, `q_${quality}`);
-
-    // Largura se especificada
     if (width) transformations.push(`w_${width}`);
-
-    // Recorte se necessário
     if (crop) {
       transformations.push("c_fill");
       if (gravity) transformations.push(`g_${gravity}`);
     }
+    transformations.push("fl_progressive", "dpr_auto", "e_sharpen:100");
 
-    // Otimizações avançadas
-    transformations.push(
-      "fl_progressive", // Progressivo para JPEG
-      "dpr_auto", // Densidade de pixel automática
-      "e_sharpen:100" // Melhoria de nitidez
-    );
-
-    // Substitui o caminho de upload com as transformações
     return url.replace("/upload/", `/upload/${transformations.join(",")}/`);
   };
 
-  /**
-   * Gera um srcset responsivo para imagens
-   * @param {string} url - URL original da imagem
-   * @param {number[]} widths - Array de larguras
-   * @returns {string} String srcset
-   */
   const generateSrcSet = (url, widths = [300, 600, 900, 1200]) => {
     return widths
       .map((width) => `${optimizeImage(url, { width })} ${width}w`)
       .join(", ");
   };
 
-  if (loading)
+  const sanitizeHtmlContent = (html) => {
+    return html?.replace(/<p>(&nbsp;|\s)*<\/p>/g, "").trim() || "";
+  };
+
+  const utmParams = `utm_source=ovaleonline&utm_medium=referral&utm_campaign=business_profile`;
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
 
-  if (!business)
+  if (!business) {
     return (
       <div className="text-center py-10">Estabelecimento não encontrado</div>
     );
-
-  function sanitizeHtmlContent(html) {
-    // Remove <p>&nbsp;</p> e <p></p>
-    return html.replace(/<p>(&nbsp;|\s)*<\/p>/g, "").trim();
   }
 
   return (
     <div className="container mx-auto mt-14 px-4 sm:px-6 lg:px-8 md:mt-24 py-8">
-      {/* Galeria Elegante - Versão Responsiva */}
-      {business.photos.length > 0 && (
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li>
+            <a href="/" className="hover:text-blue-600">
+              Home
+            </a>
+          </li>
+          {business.category?.[0] && (
+            <>
+              <li>/</li>
+              <li>
+                <a
+                  href={`/categoria/${business.category[0].slug}`}
+                  className="hover:text-blue-600"
+                >
+                  {business.category[0].name}
+                </a>
+              </li>
+            </>
+          )}
+          <li>/</li>
+          <li aria-current="page" className="text-gray-900 font-medium">
+            {business.name}
+          </li>
+        </ol>
+      </nav>
+
+      {/* Galeria de Imagens */}
+      {business.photos?.length > 0 && (
         <div className="mb-8">
           {/* Desktop */}
           <div className="hidden md:block relative w-full h-96">
@@ -156,6 +246,7 @@ const BusinessDetails = () => {
                     setSelectedImageIndex(0);
                     setIsGalleryExpanded(true);
                   }}
+                  aria-label="Ampliar imagem principal"
                 >
                   <img
                     src={optimizeImage(business.photos[0], {
@@ -164,7 +255,9 @@ const BusinessDetails = () => {
                     })}
                     srcSet={generateSrcSet(business.photos[0])}
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    alt={`${business.name} 1`}
+                    alt={`${business.name} - ${
+                      business.category?.[0]?.name || "estabelecimento"
+                    } em ${business.address?.city?.name || ""}`}
                     className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
                     loading="eager"
                   />
@@ -184,6 +277,7 @@ const BusinessDetails = () => {
                             setSelectedImageIndex(index);
                             setIsGalleryExpanded(true);
                           }}
+                          aria-label={`Ampliar imagem ${index + 1}`}
                         >
                           <img
                             src={optimizeImage(business.photos[index], {
@@ -196,9 +290,11 @@ const BusinessDetails = () => {
                               600,
                             ])}
                             sizes="(max-width: 768px) 100vw, 25vw"
-                            alt={`${business.name} ${index + 1}`}
+                            alt={`${business.name} - ${
+                              business.category?.[0]?.name || "estabelecimento"
+                            } em ${business.address?.city?.name || ""}`}
                             className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
-                            loading="lazy"
+                            loading={index > 2 ? "lazy" : "eager"}
                           />
                         </div>
                       )
@@ -215,6 +311,7 @@ const BusinessDetails = () => {
                             setSelectedImageIndex(index);
                             setIsGalleryExpanded(true);
                           }}
+                          aria-label={`Ampliar imagem ${index + 1}`}
                         >
                           <img
                             src={optimizeImage(business.photos[index], {
@@ -227,7 +324,9 @@ const BusinessDetails = () => {
                               600,
                             ])}
                             sizes="(max-width: 768px) 100vw, 25vw"
-                            alt={`${business.name} ${index + 1}`}
+                            alt={`${business.name} - ${
+                              business.category?.[0]?.name || "estabelecimento"
+                            } em ${business.address?.city?.name || ""}`}
                             className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
                             loading="lazy"
                           />
@@ -245,6 +344,7 @@ const BusinessDetails = () => {
                     setSelectedImageIndex(5);
                     setIsGalleryExpanded(true);
                   }}
+                  aria-label="Ver mais fotos"
                 >
                   <div className="h-full rounded-lg overflow-hidden relative">
                     <img
@@ -258,7 +358,9 @@ const BusinessDetails = () => {
                         600,
                       ])}
                       sizes="(max-width: 768px) 100vw, 25vw"
-                      alt={`${business.name} 6`}
+                      alt={`${business.name} - ${
+                        business.category?.[0]?.name || "estabelecimento"
+                      } em ${business.address?.city?.name || ""}`}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -283,7 +385,9 @@ const BusinessDetails = () => {
                 })}
                 srcSet={generateSrcSet(business.photos[0], [200, 400, 600])}
                 sizes="(max-width: 768px) 60vw, 30vw"
-                alt={`${business.name} 1`}
+                alt={`${business.name} - ${
+                  business.category?.[0]?.name || "estabelecimento"
+                } em ${business.address?.city?.name || ""}`}
                 className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
                 onClick={() => {
                   setSelectedImageIndex(0);
@@ -312,7 +416,9 @@ const BusinessDetails = () => {
                           300,
                         ])}
                         sizes="(max-width: 768px) 40vw, 20vw"
-                        alt={`${business.name} ${index + 1}`}
+                        alt={`${business.name} - ${
+                          business.category?.[0]?.name || "estabelecimento"
+                        } em ${business.address?.city?.name || ""}`}
                         className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
                         onClick={() => {
                           setSelectedImageIndex(index);
@@ -327,6 +433,7 @@ const BusinessDetails = () => {
                             setSelectedImageIndex(2);
                             setIsGalleryExpanded(true);
                           }}
+                          aria-label="Ver mais fotos"
                         >
                           <span className="text-white text-sm font-medium">
                             +{business.photos.length - 3}
@@ -357,6 +464,7 @@ const BusinessDetails = () => {
             <button
               onClick={() => setIsGalleryExpanded(false)}
               className="text-white text-2xl hover:text-gray-300"
+              aria-label="Fechar galeria de imagens"
             >
               &times;
             </button>
@@ -369,7 +477,9 @@ const BusinessDetails = () => {
                 src={optimizeImage(business.photos[selectedImageIndex], {
                   quality: 90,
                 })}
-                alt={`${business.name} ${selectedImageIndex + 1}`}
+                alt={`${business.name} - ${
+                  business.category?.[0]?.name || "estabelecimento"
+                } em ${business.address?.city?.name || ""}`}
                 className="max-w-full max-h-[80vh] object-contain"
                 loading="eager"
               />
@@ -386,6 +496,7 @@ const BusinessDetails = () => {
                     );
                   }}
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                  aria-label="Foto anterior"
                 >
                   &larr;
                 </button>
@@ -397,6 +508,7 @@ const BusinessDetails = () => {
                     );
                   }}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                  aria-label="Próxima foto"
                 >
                   &rarr;
                 </button>
@@ -416,6 +528,7 @@ const BusinessDetails = () => {
                       : "border-transparent"
                   }`}
                   onClick={() => setSelectedImageIndex(index)}
+                  aria-label={`Ver foto ${index + 1}`}
                 >
                   <img
                     src={optimizeImage(photo, {
@@ -441,8 +554,6 @@ const BusinessDetails = () => {
         <div className="lg:col-span-2">
           {/* Categoria e Subcategoria */}
           <div className="flex items-center space-x-2 mb-2">
-            {/* Botão de Favorito */}
-
             <div className="flex flex-wrap gap-2 mt-2">
               {/* Mostrar todas as categorias */}
               {business.category?.map((cat, index) => (
@@ -467,7 +578,6 @@ const BusinessDetails = () => {
           </div>
 
           {/* Nome */}
-
           <div className="flex items-center justify-start">
             <div>
               <h1 className="text-3xl font-bold mb-4">{business.name}</h1>
@@ -490,14 +600,14 @@ const BusinessDetails = () => {
           </div>
 
           {/* Descrição */}
-          <div className="prose max-w-none mb-8">
+          <article className="prose max-w-none mb-8">
             <div
               className="prose"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtmlContent(business.description),
               }}
             />
-          </div>
+          </article>
         </div>
 
         {/* Coluna Direita */}
@@ -541,8 +651,7 @@ const BusinessDetails = () => {
             )}
           </div>
 
-          {/* Contato / Endereço */}
-
+          {/* Endereço */}
           <div className="bg-white rounded-lg shadow p-4 text-gray-700">
             {business.address.street}, {business.address.number},{" "}
             {business.address?.neighborhood?.name},{" "}
@@ -557,10 +666,11 @@ const BusinessDetails = () => {
               <a
                 href={`https://api.whatsapp.com/send/?phone=55${cleanPhoneNumber(
                   business.whatsapp
-                )}&text=Oi!+Encontrei+sua+empresa+no+O+VALE+ONLINE.+Gostaria+de+mais+detalhes&type=phone_number&app_absent=0`}
+                )}&text=Oi!+Encontrei+sua+empresa+no+O+VALE+ONLINE.+Gostaria+de+mais+detalhes&type=phone_number&app_absent=0&${utmParams}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-green-600 mb-3"
+                className="flex items-center space-x-2 text-green-600 mb-3 hover:text-green-800"
+                aria-label="Contato via WhatsApp"
               >
                 <FaWhatsapp size={20} />
                 <span>WhatsApp</span>
@@ -569,10 +679,11 @@ const BusinessDetails = () => {
 
             {business.instagram && (
               <a
-                href={`https://instagram.com/${business.instagram}`}
+                href={`https://instagram.com/${business.instagram}?${utmParams}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-pink-600 mb-3"
+                className="flex items-center space-x-2 text-pink-600 mb-3 hover:text-pink-800"
+                aria-label="Perfil no Instagram"
               >
                 <FaInstagram size={20} />
                 <span>Instagram</span>
@@ -581,10 +692,11 @@ const BusinessDetails = () => {
 
             {business.facebook && (
               <a
-                href={`https://facebook.com/${business.facebook}`}
+                href={`https://facebook.com/${business.facebook}?${utmParams}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-blue-600 mb-3"
+                className="flex items-center space-x-2 text-blue-600 mb-3 hover:text-blue-800"
+                aria-label="Página no Facebook"
               >
                 <FaFacebook size={20} />
                 <span>Facebook</span>
@@ -593,10 +705,11 @@ const BusinessDetails = () => {
 
             {business.linkedin && (
               <a
-                href={business.linkedin}
+                href={`${business.linkedin}?${utmParams}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-blue-700 mb-3"
+                className="flex items-center space-x-2 text-blue-700 mb-3 hover:text-blue-900"
+                aria-label="Perfil no LinkedIn"
               >
                 <FaLinkedin size={20} />
                 <span>LinkedIn</span>
@@ -605,10 +718,11 @@ const BusinessDetails = () => {
 
             {business.site && (
               <a
-                href={business.site}
+                href={`${business.site}?${utmParams}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-blue-700 mb-3"
+                className="flex items-center space-x-2 text-blue-700 mb-3 hover:text-blue-900"
+                aria-label="Site oficial"
               >
                 <FaGlobe size={20} />
                 <span>Site Oficial</span>
@@ -617,6 +731,93 @@ const BusinessDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Schema.org Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: business.name,
+          image: business.photos?.[0]
+            ? optimizeImage(business.photos[0], { width: 1200 })
+            : undefined,
+          description:
+            business.description ||
+            `Conheça ${business.name} no O Vale On-Line`,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: `${business.address.street}, ${business.address.number}`,
+            addressLocality: business.address?.city?.name,
+            addressRegion: "SP",
+            postalCode: business.address.zipCode,
+            addressCountry: "BR",
+          },
+          geo:
+            business.lat && business.long
+              ? {
+                  "@type": "GeoCoordinates",
+                  latitude: business.lat,
+                  longitude: business.long,
+                }
+              : undefined,
+          telephone: business.phone,
+          sameAs: [
+            business.instagram
+              ? `https://instagram.com/${business.instagram}`
+              : undefined,
+            business.facebook
+              ? `https://facebook.com/${business.facebook}`
+              : undefined,
+            business.linkedin,
+            business.site,
+          ].filter(Boolean),
+        })}
+      </script>
+
+      {/* Negócios Relacionados */}
+      {relatedBusinesses.length > 0 && (
+        <section className="mt-12" aria-labelledby="related-businesses-heading">
+          <h2
+            id="related-businesses-heading"
+            className="text-2xl font-bold mb-6"
+          >
+            Outros {business.category?.[0]?.name || "estabelecimentos"} em{" "}
+            {business.address?.city?.name}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {relatedBusinesses.map((relatedBusiness) => (
+              <div
+                key={relatedBusiness._id}
+                className="bg-white rounded-lg shadow overflow-hidden"
+              >
+                <a href={`/empresa/${relatedBusiness.slug}`} className="block">
+                  {relatedBusiness.photos?.[0] && (
+                    <img
+                      src={optimizeImage(relatedBusiness.photos[0], {
+                        width: 400,
+                        height: 200,
+                        crop: true,
+                      })}
+                      alt={relatedBusiness.name}
+                      className="w-full h-48 object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-1">
+                      {relatedBusiness.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {relatedBusiness.address?.neighborhood?.name ||
+                        relatedBusiness.address?.neighborhood}
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

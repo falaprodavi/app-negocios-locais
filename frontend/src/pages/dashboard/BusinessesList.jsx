@@ -107,7 +107,13 @@ const BusinessesList = () => {
               {businesses.map((business) => (
                 <tr key={business._id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {business.name}
+                    <Link
+                      to={`/${business.slug}`}
+                      target="_blank"
+                      className="uppercase font-semibold text-xs text-[#042f4a] "
+                    >
+                      {business.name}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {business.category[0]?.name || "N/A"},{" "}

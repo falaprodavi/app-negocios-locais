@@ -19,6 +19,12 @@ const {
 const { protect, authorize } = require("../middleware/auth");
 const { uploadBusinessPhotos } = require("../middleware/upload");
 
+// Adicione esta rota antes das outras rotas
+router.get("/business/:slug", (req, res) => {
+  const { slug } = req.params;
+  res.redirect(301, `/${slug}`);
+});
+
 // GET /api/businesses/search
 router.get("/search", searchBusinesses);
 router.get("/dashboard/stats", getDashboardStats);

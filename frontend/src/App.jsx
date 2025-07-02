@@ -1,6 +1,14 @@
 import React from "react";
 import Navbar from "./components/Navbar";
-import { Route, Routes, useLocation, Navigate, Outlet } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+  useNavigate,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "./components/Footer";
 import Explore from "./pages/Explore";
@@ -39,6 +47,18 @@ function MainLayout() {
   );
 }
 
+// Componente para redirecionar URLs antigas
+const BusinessRedirect = () => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    navigate(`/${slug}`, { replace: true });
+  }, [slug, navigate]);
+
+  return null;
+};
+
 function App() {
   return (
     <>
@@ -52,7 +72,8 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/quem-somos" element={<About />} />
           <Route path="/politica-privacidade" element={<Privacy />} />
-          <Route path="/business/:slug" element={<BusinessDetails />} />
+          <Route path="/:slug" element={<BusinessDetails />} />
+          <Route path="/business/:slug" element={<BusinessRedirect />} />
         </Route>
 
         {/* Rotas protegidas para admin com layout de dashboard */}
