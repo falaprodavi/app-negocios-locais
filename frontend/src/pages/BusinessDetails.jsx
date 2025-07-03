@@ -202,6 +202,23 @@ const BusinessDetails = () => {
     );
   }
 
+  const convertToSecureEmbedUrl = (url) => {
+    if (!url) return "";
+
+    // Convert to secure (https) embed URL
+    let videoId = "";
+
+    if (url.includes("youtube.com/watch")) {
+      videoId = url.split("v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be")) {
+      videoId = url.split("/").pop();
+    } else if (url.includes("youtube.com/embed")) {
+      return url.replace("http:", "https:");
+    }
+
+    return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`;
+  };
+
   return (
     <div className="container mx-auto mt-14 px-4 sm:px-6 lg:px-8 md:mt-24 py-8">
       {/* Breadcrumb */}
@@ -609,20 +626,20 @@ const BusinessDetails = () => {
             />
           </article>
 
-          {/* Vídeo Embed - Se existir URL de vídeo */}
+          {/* Secure Video Embed Section */}
           {business.video && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-4">
-                Vídeo - {business.name}
+                Video - {business.name}
               </h2>
-              <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg shadow-lg">
+              <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg shadow-lg bg-gray-100">
                 <iframe
                   className="w-full h-96 md:h-[500px]"
-                  src={business.video}
-                  title={`Vídeo do estabelecimento ${business.name}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
+                  src={convertToSecureEmbedUrl(business.video)}
+                  title={`${business.name} Video Tour`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
+                  sandbox="allow-same-origin allow-scripts allow-popups"
                 ></iframe>
               </div>
             </div>
