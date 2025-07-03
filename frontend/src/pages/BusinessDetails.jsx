@@ -37,7 +37,7 @@ const BusinessDetails = () => {
       // Título otimizado para SEO
       document.title = `${business.name} | ${
         business.category?.[0]?.name || "Negócio"
-      } em ${business.address?.city?.name || ""} - O Vale On-Line`;
+      } em ${business.address?.city?.name || ""} - O Vale do Paraíba On-Line`;
 
       // Meta description
       let metaDescription = document.querySelector('meta[name="description"]');
