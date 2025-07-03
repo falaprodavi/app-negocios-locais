@@ -608,6 +608,25 @@ const BusinessDetails = () => {
               }}
             />
           </article>
+
+          {/* Vídeo Embed - Se existir URL de vídeo */}
+          {business.video && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">
+                Vídeo - {business.name}
+              </h2>
+              <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg shadow-lg">
+                <iframe
+                  className="w-full h-96 md:h-[500px]"
+                  src={business.video}
+                  title={`Vídeo do estabelecimento ${business.name}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Coluna Direita */}
