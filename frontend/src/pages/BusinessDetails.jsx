@@ -233,12 +233,12 @@ const BusinessDetails = () => {
             <>
               <li>/</li>
               <li>
-                {/* <a
-                  href={`/categoria/${business.category[0].slug}`}
+                <a
+                  href={`/explore?category=${business.category[0].slug}`}
                   className="hover:text-blue-600"
-                > */}
-                {business.category[0].name}
-                {/* </a>*/}
+                >
+                  {business.category[0].name}
+                </a>
               </li>
             </>
           )}
