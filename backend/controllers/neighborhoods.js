@@ -4,7 +4,9 @@ const slugify = require("slugify");
 
 exports.getAllNeighborhoods = async (req, res) => {
   try {
-    const neighborhoods = await Neighborhood.find().populate("city");
+    const neighborhoods = await Neighborhood.find()
+      .sort({ name: 1 }) // Ordem alfabética crescente (A-Z)
+      .populate("city");
     res.json(neighborhoods);
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar bairros." });
@@ -40,9 +42,9 @@ exports.getNeighborhoodBySlug = async (req, res) => {
 exports.getNeighborhoodsByCity = async (req, res) => {
   try {
     const cityId = req.params.cityId;
-    const neighborhoods = await Neighborhood.find({ city: cityId }).populate(
-      "city"
-    );
+    const neighborhoods = await Neighborhood.find({ city: cityId })
+      .sort({ name: 1 })
+      .populate("city");
     res.json(neighborhoods);
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar bairros por cidade." });
@@ -175,14 +177,13 @@ exports.getNeighborhoods = async (req, res) => {
     let filter = {};
 
     if (city) {
-      // Verifica se a cidade existe pelo slug
       const cityDoc = await City.findOne({ slug: city });
-      if (cityDoc) {
-        filter.city = cityDoc._id;
-      }
+      if (cityDoc) filter.city = cityDoc._id;
     }
 
-    const neighborhoods = await Neighborhood.find(filter).populate("city");
+    const neighborhoods = await Neighborhood.find(filter)
+      .sort({ name: 1 }) // Adicionado: Ordem A-Z
+      .populate("city");
     res.json(neighborhoods);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -5,7 +5,7 @@ const slugify = require("slugify");
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().sort({ name: 1 }); // Ordem A-Z
     res.json(categories);
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar categorias." });

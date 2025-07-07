@@ -5,7 +5,7 @@ const { cloudinary } = require("../config/cloudinary");
 
 exports.getAllCities = async (req, res) => {
   try {
-    const cities = await City.find();
+    const cities = await City.find().sort({ name: 1 }); // Ordem A-Z;
     res.json(cities);
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar cidades." });

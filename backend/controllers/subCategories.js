@@ -74,7 +74,9 @@ exports.getSubCategoriesByCategory = async (req, res) => {
     const subCategories = await SubCategory.find({
       category: category._id,
       active: true,
-    }).select("name slug icon");
+    })
+      .select("name slug icon")
+      .sort({ name: 1 });
 
     res.json(subCategories);
   } catch (err) {
@@ -90,7 +92,9 @@ exports.getSubCategoriesByCategoryId = async (req, res) => {
 
     const subCategories = await SubCategory.find({
       category: categoryId,
-    }).populate("category");
+    })
+      .populate("category")
+      .sort({ name: 1 });
 
     res.json(subCategories);
   } catch (err) {
@@ -267,7 +271,9 @@ exports.getSubCategories = async (req, res) => {
       }
     }
 
-    const subCategories = await SubCategory.find(filter).populate("category");
+    const subCategories = await SubCategory.find(filter)
+      .populate("category")
+      .sort({ name: 1 });
     res.json(subCategories);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -145,11 +145,18 @@ exports.getBusinesses = async (req, res) => {
 exports.getLatestBusinesses = async (req, res) => {
   const limit = parseInt(req.query.limit) || 6;
   try {
-    const businesses = await Business.find()
+    // Pega mais registros (ex: 50) para ter variedade na randomização
+    const latestBusinesses = await Business.find()
       .sort({ createdAt: -1 })
-      .limit(limit)
+      .limit(15) // Pega os 50 mais recentes (ajuste conforme necessidade)
       .populate("category subCategory address.city address.neighborhood");
-    res.json({ success: true, data: businesses });
+
+    // Embaralha o array e pega apenas o "limit" desejado
+    const shuffledBusinesses = latestBusinesses
+      .sort(() => Math.random() - 0.5) // Randomiza
+      .slice(0, limit); // Pega apenas o limite pedido (ex: 6)
+
+    res.json({ success: true, data: shuffledBusinesses });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
