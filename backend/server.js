@@ -10,7 +10,7 @@ const app = express();
 const { protect, authorize } = require("./middleware/auth");
 
 // Middleware
-// app.use(cors());
+//app.use(cors());
 
 app.use(
   cors({
@@ -25,15 +25,6 @@ app.use(
 );
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-
-// ★★★★★ REDIRECIONAMENTO ESPECÍFICO ★★★★★
-app.get("/helio-flores-uniateneu", (req, res) => {
-  return res.redirect(
-    301,
-    "https://www.ovaleonline.com.br/helio-parceiro-uniateneu"
-  );
-});
 
 // Servir arquivos estáticos (para as imagens)
 app.use(express.static(path.join(__dirname, "public")));
