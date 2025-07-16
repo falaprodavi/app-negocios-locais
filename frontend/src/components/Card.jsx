@@ -76,7 +76,7 @@ const Card = ({ business, loading = false }) => {
               className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105 rounded-b-2xl"
             />
             {/* Tag da categoria */}
-            <div className="absolute top-2 left-2  text-white text-[10px] font-bold py-1 px-2 rounded">
+            <div className="absolute top-0 right-0  text-white text-[10px] font-bold py-1 px-2 rounded">
               <div className="flex flex-wrap gap-1 mt-2">
                 {/* Categorias */}
 

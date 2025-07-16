@@ -148,7 +148,7 @@ exports.getLatestBusinesses = async (req, res) => {
     // Pega mais registros (ex: 50) para ter variedade na randomização
     const latestBusinesses = await Business.find()
       .sort({ createdAt: -1 })
-      .limit(15) // Pega os 50 mais recentes (ajuste conforme necessidade)
+      .limit(20) // Pega os 20 mais recentes (ajuste conforme necessidade)
       .populate("category subCategory address.city address.neighborhood");
 
     // Embaralha o array e pega apenas o "limit" desejado
