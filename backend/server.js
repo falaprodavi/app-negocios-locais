@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const sitemapRoutes = require("./routes/sitemap");
 
 const app = express();
 
@@ -24,6 +25,15 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+// ★★★★★ REDIRECIONAMENTO ESPECÍFICO ★★★★★
+app.get("/helio-flores-uniateneu", (req, res) => {
+  return res.redirect(
+    301,
+    "https://www.ovaleonline.com.br/helio-parceiro-uniateneu"
+  );
+});
 
 // Servir arquivos estáticos (para as imagens)
 app.use(express.static(path.join(__dirname, "public")));
@@ -45,6 +55,8 @@ app.use((err, req, res, next) => {
     message: "Erro no servidor",
   });
 });
+
+app.use("/", sitemapRoutes);
 
 // Rotas
 app.use("/api/auth", require("./routes/auth"));
