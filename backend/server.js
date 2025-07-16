@@ -26,6 +26,10 @@ app.use(
 
 app.use(express.json());
 
+app.get("/helio-flores-uniateneu", (req, res) => {
+  res.redirect(301, "/helio-parceiro-uniateneu");
+});
+
 // Servir arquivos estáticos (para as imagens)
 app.use(express.static(path.join(__dirname, "public")));
 
