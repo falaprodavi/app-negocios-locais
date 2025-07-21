@@ -669,7 +669,7 @@ const BusinessesManager = () => {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fotos (Máx. 10)
+              Fotos (Máx. 15)
             </label>
             <div className="flex flex-wrap gap-4 mb-4">
               {previewImages.map((img, index) => (
