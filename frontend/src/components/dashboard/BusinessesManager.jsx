@@ -724,7 +724,7 @@ const BusinessesManager = () => {
                 hover:file:bg-blue-100"
               accept="image/*"
               multiple
-              max="10"
+              max="15"
             />
             <p className="mt-1 text-xs text-gray-500">
               PNG, JPG, JPEG até 5MB cada
