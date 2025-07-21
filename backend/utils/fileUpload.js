@@ -132,5 +132,5 @@ module.exports = {
     storage: businessStorage,
     fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 },
-  }).array("photos", 10), // Aceita até 10 fotos
+  }).array("photos", 15), // Aceita até 15 fotos
 };
