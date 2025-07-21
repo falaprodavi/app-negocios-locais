@@ -47,7 +47,7 @@ router
   .post(
     protect,
     authorize("admin", "owner"),
-    uploadBusinessPhotos.array("photos", 10),
+    uploadBusinessPhotos.array("photos", 15),
     createBusiness
   );
 
@@ -57,7 +57,7 @@ router
   .put(
     protect,
     authorize("admin", "owner"),
-    uploadBusinessPhotos.array("photos", 10),
+    uploadBusinessPhotos.array("photos", 15),
     updateBusiness
   )
   .delete(protect, authorize("admin", "owner"), deleteBusiness);
