@@ -32,7 +32,7 @@ const City = () => {
           <div className="bg-white rounded-2xl shadow-md hover:shadow-lg overflow-hidden relative flex flex-col h-full transition-all">
             <div className="relative">
               <img
-                src={city.image}
+                src={city.image || "/default-city.jpg"}
                 alt={city.name}
                 className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
