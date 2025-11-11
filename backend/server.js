@@ -12,13 +12,27 @@ const { protect, authorize } = require("./middleware/auth");
 // Middleware
 //app.use(cors());
 
+import cors from "cors";
+
+const allowedOrigins = [
+  "https://app-negocios-locais.vercel.app",
+  "https://www.ovaleonline.com.br",
+  "https://ovaleonline.com.br",
+  "http://localhost:3000", // opcional para desenvolvimento local
+];
+
 app.use(
   cors({
-    origin: [
-      "https://app-negocios-locais.vercel.app",
-      "https://www.ovaleonline.com.br",
-      "https://ovaleonline.com.br",
-    ],
+    origin: function (origin, callback) {
+      // Permite ferramentas como Postman ou requisições internas sem "origin"
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
